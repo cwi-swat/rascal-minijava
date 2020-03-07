@@ -451,7 +451,7 @@ Context compute_class_members(Context c, str class_name) {
       if ([parent_name] := cl.parents) {
          c = compute_class_members(c, parent_name);
          if (!c.failed && envlit(sup_map) := get_result(c)) {
-           return set_result(c, envlit(sub_map + sup_map));
+           return set_result(c, envlit(sup_map + sub_map));
          }
          else return set_fail(c);
       }

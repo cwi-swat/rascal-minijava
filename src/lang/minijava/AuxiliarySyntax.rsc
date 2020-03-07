@@ -37,7 +37,9 @@ Context sto_override(Context c, Sto sto) = ctx(c.env, c.sto + sto, c.seed, c.out
 
 tuple[Ref, Context] fresh_atom(Context c) = <c.seed, ctx(c.env, c.sto, c.seed + 1, c.out, c.given, c.failed, c.res)>;
 
-Context append_output(Context c, Out out) = ctx(c.env, c.sto, c.seed, c.out + out, c.given, c.failed, c.res);
+Context append_output(Context c, Out out) {
+  return ctx(c.env, c.sto, c.seed, c.out + out, c.given, c.failed, c.res);
+}
 
 Context with_given(Context c, Val given, Context(Context) body) {
   c2 = body(ctx(c.env, c.sto, c.seed, c.out, given, c.failed, c.res));

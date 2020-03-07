@@ -1,0 +1,13 @@
+class BasicInheritance {
+  public static void main(String[] args) {
+    System.out.println(new Sub().sub());
+  }
+}
+
+class Super {
+  public int sup() { return 6; }
+}
+
+class Sub extends Super{
+  public int sub() { return this.sup() * 7; }
+}

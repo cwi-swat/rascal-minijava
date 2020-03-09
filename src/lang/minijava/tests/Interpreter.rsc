@@ -1,4 +1,4 @@
-module lang::minijava::tests::Main
+module lang::minijava::tests::Interpreter
 
 import lang::minijava::Syntax;
 import lang::minijava::AuxiliarySyntax;

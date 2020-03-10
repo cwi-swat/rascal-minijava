@@ -1,0 +1,9 @@
+class Super {
+  public int sup() { return 6; }
+}
+
+class Sub extends Super{
+  public int sub() { return this.sup() * 7; }
+}
+
+new Sub().sub()

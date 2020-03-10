@@ -84,4 +84,4 @@ class BBS{
     }
 
 }
-new BBS().Start(10)
+new BBS().Start(10);

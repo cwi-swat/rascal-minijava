@@ -10,4 +10,4 @@ class Fac {
     }
 }
 
-new Fac().ComputeFac(10)
+new Fac().ComputeFac(10);

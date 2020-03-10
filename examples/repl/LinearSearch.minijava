@@ -91,4 +91,4 @@ class LS {
 
 }
 
-new LS().Start(10)
+new LS().Start(10);

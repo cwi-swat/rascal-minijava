@@ -10,4 +10,4 @@ class Sub {
   }
 }
 
-new Sub().method()
+new Sub().method();

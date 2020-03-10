@@ -1,0 +1,33 @@
+
+int x;
+x = 1;
+int y;
+y = x + 1;
+
+y;
+System.out.println(x);
+
+class A {
+  int f;
+  
+  public int set_f(int a) {
+    int old_f;
+    old_f = f;
+    f = a;
+    return old_f;
+  }
+  
+  public int method() {
+    return f + y;
+  }
+}
+
+A a;
+a = new A();
+a.set_f(5); //prints 0
+
+a.method();
+
+y = y + 100;
+
+a.method();

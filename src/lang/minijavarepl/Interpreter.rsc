@@ -10,11 +10,10 @@ import lang::std::Layout;
 Context exec(Program p) = exec(p, empty_context());
 Context exec((Program) `<Phrase* phrases>`, Context c) = ( empty_context() | phrase_decl(phrase, it) | phrase <- phrases );
 	
-Context phrase_decl((Phrase) `<Expression E>`, Context c) = phrase_expr_decl(E, c);
 Context phrase_decl((Phrase) `<Expression E> ;`, Context c) = phrase_expr_decl(E, c);
 Context phrase_decl((Phrase) `<Statement S>`, Context c) = exec(c, S);
 Context phrase_decl((Phrase) `<ClassDecl CD>`, Context c) = accumulate(phrase_class(c, CD));
-Context phrase_decl((Phrase) `<VarDecl VD>`, Context c) = accumulate(declare_variables(c, VD));
+Context phrase_decl((Phrase) `<VarDecl VD>`, Context c) = accumulate(declare_variables(c, [VD]));
     
 Context phrase_expr_decl(E, Context c) {
   c = eval(c, E);

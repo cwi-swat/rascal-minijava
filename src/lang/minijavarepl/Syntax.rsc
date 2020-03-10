@@ -2,7 +2,7 @@ module lang::minijavarepl::Syntax
 
 import lang::minijava::Syntax;
                   
-syntax Phrase = Expression ";"? | Statement | VarDecl | ClassDecl;
+syntax Phrase = Expression ";" | Statement | VarDecl | ClassDecl;
                   
 syntax Program = Standard Phrase* Standard;
 

@@ -6,4 +6,4 @@ class Sub extends Super{
   public int sub() { return this.sup() * 7; }
 }
 
-new Sub().sub()
+new Sub().sub();

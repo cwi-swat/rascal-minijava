@@ -54,4 +54,6 @@ Context set_fail(Context c) {
 }
 
 Val get_result(Context c) = c.res;
-Context set_result(Context c, Val res) = ctx(c.env, c.sto, c.seed, c.out, c.given, c.failed, res);
+Context set_result(Context c, Val res) {
+  if (c.failed) return c; else return ctx(c.env, c.sto, c.seed, c.out, c.given, c.failed, res);
+}

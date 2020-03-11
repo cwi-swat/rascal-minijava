@@ -1,0 +1,23 @@
+int global;
+global = 1;
+
+global;
+
+class MyClass {
+  int field;
+  
+  public int add_global_field() {
+    field = field + global;
+    return field;
+  }
+}
+
+MyClass object;
+object = new MyClass();
+
+object.add_global_field(); 
+object.add_global_field(); 
+
+global = 100;
+
+object.add_global_field();

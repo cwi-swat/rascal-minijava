@@ -8,7 +8,7 @@ import lang::minijava::Interpreter;
 import lang::std::Layout;
 
 Context exec(Program p) = exec(p, empty_context());
-Context exec((Program) `<Phrase* phrases>`, Context c) = ( empty_context() | phrase_decl(phrase, it) | phrase <- phrases );
+Context exec((Program) `<Phrase* phrases>`, Context c) = ( c | phrase_decl(phrase, it) | phrase <- phrases );
 	
 Context phrase_decl((Phrase) `<Expression E> ;`, Context c) = phrase_expr_decl(E, c);
 Context phrase_decl((Phrase) `<Statement S>`, Context c) = exec(c, S);

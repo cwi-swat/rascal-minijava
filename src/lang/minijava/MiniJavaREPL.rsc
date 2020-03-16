@@ -1,8 +1,11 @@
 module lang::minijava::MiniJavaREPL
 
+import Map;
 import List;
 import String;
+
 import bacata::REPL;
+import bacata::Notebook;
 
 import lang::minijavarepl::Syntax;
 //import lang::minijava::Syntax;
@@ -13,6 +16,11 @@ import lang::minijavarepl::AuxiliarySyntax;
 
 
 import lang::html5::DOM;
+
+NotebookServer getNB(bool debug = false) {
+	k = kernel("MiniJava", |home:///Documents/ResearchProjects/rascal-minijava/src/|, "lang::minijava::MiniJavaREPL::myMiniJavaREPl", salixPath=|home:///salix/src|);
+	return createNotebook(k, debug = debug);
+}
 
 REPL myMiniJavaREPl() {
 	Context miniJHandler(str input, Context c) {
@@ -40,6 +48,9 @@ REPL myMiniJavaREPl() {
 		}
 		return commandResult(replaceAll(result, "\n", ""));
 	}
+	
+	Completion miniJavaCompletor(str line, int cursor, Context config)
+		= <0, [ e | e <- config.env, startsWith(e, line) ]>;
 
-	return replization(miniJHandler, empty_context(), miniJPrinter);
+	return replization(miniJHandler, empty_context(), miniJPrinter, miniJavaCompletor);
 }

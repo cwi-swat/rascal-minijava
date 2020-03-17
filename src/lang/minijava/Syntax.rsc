@@ -31,7 +31,7 @@ keyword Keywords = "String" | "System" | "boolean"
                | "true"
                | "void";
 
-start syntax Expression
+syntax Expression
 	= Integer
 	| Expression "." "length"
 	| "true"

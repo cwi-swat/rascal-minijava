@@ -1,0 +1,26 @@
+class A {
+  int a;
+
+  public int ma() {
+    a = a + 1;
+    return a;
+  }
+  
+  public int mc() {
+    return 12;
+  }
+}
+A oa; 
+oa = new A();
+class A {
+  public int ma() {
+    return 42 + a;
+  }
+  
+  public int mb() {
+    return 7;
+  }
+}
+oa.ma();  // prints 42
+oa.mb();  // prints 7
+oa.mc();  // prints 12

@@ -1,0 +1,33 @@
+
+class A {
+  int a;
+
+  public int ma() {
+    a = a + 1;
+    return a;
+  }
+}
+
+class A {
+  int b;
+
+  public int mb() {
+    b = this.ma() + 1;
+    return b + a;
+  }
+}
+
+class A {
+  int c;
+  public int mc() {
+    c = this.mb() + 3;
+    return a+b+c;
+  }
+}
+
+A oa;
+
+oa = new A();
+
+oa.mc();  // prints 9
+oa.mc();  // prints 13

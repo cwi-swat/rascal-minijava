@@ -7,6 +7,9 @@ import lang::minijava::Interpreter;
 
 import lang::std::Layout;
 
+import util::Maybe;
+import IO;
+
 Context exec(Program p) = exec(p, empty_context());
 Context exec((Program) `<Phrase* phrases>`, Context c) = ( c | phrase_decl(phrase, it) | phrase <- phrases );
 	
@@ -25,7 +28,32 @@ Context accumulate(Context c) {
 Context phrase_class(Context c, ClassDecl CD) {
   c = bind_class_occurrences(c, class_occurrences(CD));
   if (!c.failed && envlit(env) := get_result(c)) {
-    return declare_classes(env_override(c, env), CD);
+    return redeclare_class(env_override(c, env), CD);
+  }
+  else return set_fail(c);
+}
+
+Context redeclare_class(Context c, (ClassDecl) 
+  `class <Identifier ID1> extends <Identifier ID2> { <VarDecl* VDs> <MethodDecl* MDs> }`) 
+  = redeclare_class(c, ID1, VDs, MDs, just("<ID2>"));
+Context redeclare_class(Context c, (ClassDecl) 
+  `class <Identifier ID1> { <VarDecl* VDs> <MethodDecl* MDs> }`) 
+  = redeclare_class(c, ID1, VDs, MDs, nothing());
+Context redeclare_class(Context c, ID, VDs, MDs, Maybe[str] mID2) {
+  c = declare_class_val(c, ID, VDs, MDs, mID2);
+  if (!c.failed && classlit(class_val) := get_result(c)) {
+    try {
+	    if(ref(r) := c.env["<ID>"]) {
+	  	  if (classlit(old_class) := c.sto[r]) {
+	  	    return set_result(sto_override(c, ( r : classlit(class_override(class_val,old_class)) )), envlit(( "<ID>" : ref(r))));
+	  	  }
+	  	  else {
+	  	    return set_result(sto_override(c, ( r : classlit(class_val) )), envlit(( "<ID>" : ref(r))));
+	  	  }  
+	    }
+	    else return set_fail(c);
+	}    
+	catch exc: {print(exc); return set_fail(c);}
   }
   else return set_fail(c);
 }

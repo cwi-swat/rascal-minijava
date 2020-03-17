@@ -1,0 +1,12 @@
+
+class A {
+  public int ma() { return 0; }
+}
+class A {
+  public int mb() { return 1; }
+}
+
+A oa;
+oa = new A();
+oa.ma(); // prints 0
+oa.mb(); // prints 1

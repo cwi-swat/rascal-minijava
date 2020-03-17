@@ -1,0 +1,29 @@
+
+class Super {
+
+}
+
+class Sub {
+
+}
+
+Sub s;
+s = new Sub();
+
+class Sub extends Super {
+
+}
+
+class Sub {
+  public int sub() {
+    return this.sup() * 7;
+  }
+}
+
+class Super {
+  public int sup() {
+    return 6;
+  }
+}
+
+s.sub(); // prints 42

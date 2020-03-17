@@ -96,6 +96,20 @@ Context declare_class(Context c, (ClassDecl)
   '}`) = declare_class(c,ID,VDs,MDs,nothing()); 
 
 Context declare_class(Context c, ID, VDs, MDs, Maybe[str] mID2) {
+  c = declare_class_val(c, ID, VDs, MDs, mID2);
+  if (!c.failed && classlit(class_val) := get_result(c)) {
+    try {
+	    if(ref(r) := c.env["<ID>"]) {
+	  	  return set_result(sto_override(c, ( r : classlit(class_val) )), envlit(( "<ID>" : ref(r))));
+	    }
+	    else return set_fail(c);
+	}    
+	catch exc: {print(exc); return set_fail(c);}
+  }
+  else return set_fail(c);
+}
+
+Context declare_class_val(Context c, ID, VDs, MDs, Maybe[str] mID2) {
   cons = Context(Context local_c) {
     <obj_id, local_c> = fresh_atom(local_c);
     local_c = declare_variables(local_c,VDs);
@@ -126,13 +140,7 @@ Context declare_class(Context c, ID, VDs, MDs, Maybe[str] mID2) {
 	  class_val = class(cons,method_map,[]);
 	  if (just(ID2) := mID2)
 	    class_val = class(cons,method_map,["<ID2>"]);
-	  try {
-	    if(ref(r) := c.env["<ID>"]) {
-	  	  return set_result(sto_override(c, ( r : classlit(class_val) )), envlit(( "<ID>" : ref(r))));
-	    }
-	    else return set_fail(c);
-	  }
-	  catch exc: {print(exc); return set_fail(c);}
+      return set_result(c, classlit(class_val));
   }
   else return set_fail(c);
 }

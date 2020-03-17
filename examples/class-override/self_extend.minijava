@@ -1,0 +1,24 @@
+class I {
+
+  public int call() {
+    return this.api();
+  }
+}
+
+class I {
+  public int api() {
+    return 1;
+  }
+}
+
+I i;
+i = new I();
+i.call(); // prints 1
+
+class I {
+  public int api() {
+    return 2;
+  }
+}
+
+i.call(); // prints 2

@@ -113,6 +113,8 @@ Context eval(Context c0, (Expression) `<Identifier ID> ( <ExpressionList? ELs> )
     else return set_fail(c);
   }
   catch: {
-    return eval(c0, (Expression) `this.<Identifier ID> ( <ExpressionList? ELs> )`);
+    // the code below seems to reveal a bug in Rascal?
+    // return eval(c0, (Expression) `this.<Identifier ID> ( <ExpressionList? ELs> )`);
+    return set_fail(c);
   }
 }

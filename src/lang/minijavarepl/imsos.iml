@@ -1,0 +1,189 @@
+relation(->) // big-step
+
+entity(env, _map_empty)
+entity(sto, _map_empty)
+entity(seed, 0)
+
+
+// expressions
+#
+------
+lit(V) -> V
+
+E -> V
+------
+length(E) -> _size(V)
+
+#
+------
+tt() -> true<>
+
+#
+------
+ff() -> false<>
+
+_map_lookup(Gam,Id) |> R
+_map_lookup(Sig,R)  |> V
+------
+ref(Id), env = Gam, sto = Sig -> V, env = Gam, sto = Sig
+
+E -> N
+new_references(N,0) -> V
+------
+new_array(E) -> V
+
+_int_leq(N,0) |> true<>
+------ 
+new_references(N,D) -> _list_nil
+
+_int_geq(N,1) |> true<>
+_pred(N) |> N2
+new_reference(D) -> V
+new_references(N2, D) -> Vs
+------
+new_references(N,D) -> _list_cons(V,Vs)
+
+_succ(S0) |> S1
+_map_insert(S1,D,Sig0) |> Sig1
+------
+new_reference(D), seed = S0, sto = Sig0 -> S1, seed = S1, sto = Sig1
+
+// skipped new_object -- method_call
+
+E -> V
+------
+not(E) -> _bool_neg(V)
+
+P -> V1
+Q -> V2
+------
+mult(P,Q) -> _int_product(V1,V2)
+
+
+P -> V1
+Q -> V2
+------
+plus(P,Q) -> _int_sum(V1,V2)
+
+P -> V1
+Q -> V2
+------
+minus(P,Q) -> _int_subtract(V1,V2)
+
+P -> V1
+Q -> V2
+------
+less_than(P,Q) -> _int_less_than(V1,V2)
+
+P -> V1
+Q -> V2
+------
+and(P,Q) -> _bool_and(V1,V2)
+
+// statements
+
+entity(out, _list_nil)
+
+E -> true<>
+S1 -> V
+------
+if_then_else(E,S1,_) -> V
+
+E -> false<>
+S2 -> V
+------
+if_then_else(E,_,S2) -> V
+
+E -> true<>
+S -> _
+while_loop(E,S) -> V
+------
+while_loop(E,S) -> V
+
+E -> false<>
+------
+while_loop(E,S) -> done()
+
+E, out = Alp0 -> V, out = Alp1
+------
+print(E), out = Alp0 -> done(), out = _list_append(Alp1,V)
+
+E, env = Gam, sto = Sig0 -> V, env = Gam, sto = Sig1
+_map_lookup(Gam, I) |> R
+_map_insert(R, V, Sig1) |> Sig2
+------
+assign(I,E), env = Gam, sto = Sig0 -> done(), env = Gam, sto = Sig2
+
+_map_lookup(Gam,I) |> R
+_map_lookup(Sig0,R) |> A
+P, env = Gam, sto = Sig0 -> N, env = Gam, sto = Sig1
+_index(A,N) |> R2
+Q, env = Gam, sto = Sig1 -> V, env = Gam, sto = Sig2
+_map_insert(R2,V,Sig2) |> Sig3
+------
+array_assign(I,P,Q), env = Gam, sto = Sig0 -> done(), env = Gam, sto = Sig3 
+
+S1 -> _
+S2 -> V
+------
+seq(S1, S2) -> V
+
+// variable declarations
+
+Ty =def=> V
+new_reference(V), env = Gam -> R, env = Gam
+------
+vardecl(Ty, Id), env = Gam -> _map_singleton(Id,R), env = Gam
+
+#
+------
+close(S), env = Gam -> closure(Gam, S)
+
+
+relation(=def=>) // gets initial value of a type
+
+#
+------
+"int" =def=> 0 
+
+// termination
+
+_is_value(V)
+(1)------
+V -> V
+
+#
+(1)------
+closure(Gam,S) -> closure(Gam,S)
+
+D, env = Gam0 -> Gam1, env = Gam0
+S, env = _map_union(Gam0, Gam1) -> V, env = Gam2
+------
+scope(D,S), env = Gam0 -> V, env = Gam0
+
+D1, env = Gam0 -> Gam1, env = Gam0
+D2, env = Gam1 -> Gam2, env = Gam1
+------
+accumulate(D1, D2), env = Gam0 -> _map_union(Gam0, Gam1), env = Gam0
+
+D -> Gam
+------
+phrase_decl(D) -> Gam
+
+S -> _
+------
+phrase_stmt(S) -> _map_empty()
+
+D1, env = Gam0 -> Gam1, env = Gam0
+D2, env = _map_union(Gam0, Gam1) -> Gam2, env = Gam1
+------
+phrase_seq(D1, D2), env = Gam0 -> _map_union(Gam0, _map_union(Gam1,Gam2)), env = Gam0
+
+#
+------
+phrase_skip() -> map_empty()
+
+#
+(1)------
+done() -> done()
+

@@ -156,6 +156,11 @@ V -> V
 (1)------
 closure(Gam,S) -> closure(Gam,S)
 
+closure(Gam, Body) |> Clo
+new_reference(Clo), env = Gam -> R, env = Gam 
+------
+method(Nm, Body), env = Gam -> _map_singleton(Nm, R), env = Gam
+
 D, env = Gam0 -> Gam1, env = Gam0
 S, env = _map_union(Gam0, Gam1) -> V, env = Gam2
 ------
@@ -168,7 +173,11 @@ accumulate(D1, D2), env = Gam0 -> _map_union(Gam0, Gam1), env = Gam0
 
 D -> Gam
 ------
-phrase_decl(D) -> Gam
+phrase_vardecl(D) -> Gam
+
+D -> Gam
+------
+phrase_method_decl(D) -> Gam
 
 S -> _
 ------

@@ -271,6 +271,19 @@ Context eval2(Context ctx, "int") {
   ctx.res = 0;
   return ctx;
 }
+Context eval1(Context ctx, method(Nm,Body)) {
+  Gam = ctx.env;
+  if(Clo := closure(Gam,Body)) {
+    ctx.env = Gam;
+    ctx = eval1(ctx,new_reference(Clo));
+    Gam = ctx.env;
+    if(R := ctx.res) {
+      ctx.env = Gam;
+      ctx.res = map_singleton(Nm , R);
+      return ctx;
+    } else { fail; }
+  } else { fail; }
+}
 Context eval1(Context ctx, scope(D,S)) {
   Gam0 = ctx.env;
   ctx.env = Gam0;
@@ -303,7 +316,14 @@ Context eval1(Context ctx, accumulate(D1,D2)) {
     } else { fail; }
   } else { fail; }
 }
-Context eval1(Context ctx, phrase_decl(D)) {
+Context eval1(Context ctx, phrase_vardecl(D)) {
+  ctx = eval1(ctx,D);
+  if(Gam := ctx.res) {
+    ctx.res = Gam;
+    return ctx;
+  } else { fail; }
+}
+Context eval1(Context ctx, phrase_method_decl(D)) {
   ctx = eval1(ctx,D);
   if(Gam := ctx.res) {
     ctx.res = Gam;

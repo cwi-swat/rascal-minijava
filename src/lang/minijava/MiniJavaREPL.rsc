@@ -4,6 +4,7 @@ import Map;
 import List;
 import String;
 
+import Content;
 import bacata::REPL;
 import bacata::Notebook;
 
@@ -33,7 +34,7 @@ REPL myMiniJavaREPl() {
 		}
 	}
 	
-	CommandResult miniJPrinter(Context old, Context current) {
+	Content miniJPrinter(Context old, Context current) {
 		str result = "";
 		//if (!current.failed && !isEmpty(current.out)) {			
 		if (!current.failed) {
@@ -46,11 +47,11 @@ REPL myMiniJavaREPl() {
 				 HTML5Attr::style("color:red")));
 			result = deescape(toString(res));
 		}
-		return commandResult(replaceAll(result, "\n", ""));
+		return html(replaceAll(result, "\n", ""));
 	}
 	
 	Completion miniJavaCompletor(str line, int cursor, Context config)
 		= <0, [ e | e <- config.env, startsWith(e, line) ]>;
 
-	return replization(miniJHandler, empty_context(), miniJPrinter, miniJavaCompletor);
+	return repl2(newHandler = miniJHandler, initConfig = empty_context(), printer = miniJPrinter, completor = miniJavaCompletor);
 }

@@ -10,16 +10,15 @@ import lang::std::Layout;
 import util::Maybe;
 import IO;
 
-Context exec(Program p) = exec(p, empty_context());
-Context exec((Program) `<Phrase* phrases>`, Context c) = ( c | phrase_decl(phrase, it) | phrase <- phrases );
 	
-Context phrase_decl((Phrase) `<Expression E> ;`, Context c) = phrase_decl((Phrase) `System.out.println(<Expression E>);`, c);
-Context phrase_decl((Phrase) `<Statement S>`, Context c) = exec(c, S);
-Context phrase_decl((Phrase) `<ClassDecl CD>`, Context c) = accumulate(phrase_class(c, CD));
-Context phrase_decl((Phrase) `<VarDecl VD>`, Context c) = accumulate(declare_variables(c, [VD]));
-Context phrase_decl((Phrase) `<MethodDecl MD>`, Context c) = accumulate(declare_global_method(c, MD));
+Context eval((Phrase) `<Expression E> ;`, Context c) = eval((Phrase) `System.out.println(<Expression E>);`, c);
+Context eval((Phrase) `<Statement S>`, Context c) = exec(c, S);
+Context eval((Phrase) `<ClassDecl CD>`, Context c) = collect_bindings(phrase_class(c, CD));
+Context eval((Phrase) `<VarDecl VD>`, Context c) = collect_bindings(declare_variables(c, [VD]));
+Context eval((Phrase) `<MethodDecl MD>`, Context c) = collect_bindings(declare_global_method(c, MD));
+Context eval((Phrase) `<Phrase P1> <Phrase P2>`, Context c) = eval(P2, eval(P1,c));
 
-Context accumulate(Context c) {
+Context collect_bindings(Context c) {
   if (!c.failed && envlit(env) := get_result(c)) {
     return env_override(c, env);
   }

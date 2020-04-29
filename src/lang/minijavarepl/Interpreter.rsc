@@ -10,22 +10,27 @@ import lang::std::Layout;
 import util::Maybe;
 import IO;
 
-	
-Context eval((Phrase) `<Expression E> ;`, Context c) = eval((Phrase) `System.out.println(<Expression E>);`, c);
-Context eval((Phrase) `<Statement S>`, Context c) = exec(c, S);
-Context eval((Phrase) `<ClassDecl CD>`, Context c) = collect_bindings(phrase_class(c, CD));
-Context eval((Phrase) `<VarDecl VD>`, Context c) = collect_bindings(declare_variables(c, [VD]));
-Context eval((Phrase) `<MethodDecl MD>`, Context c) = collect_bindings(declare_global_method(c, MD));
+Context eval((Program) `<Phrase P>`) = eval(P);
+
+Context eval(Phrase p) = eval(p, empty_context());	
+Context eval((Phrase) `<Expression E> ;`, Context c)        = eval((Phrase) `System.out.println(<Expression E>);`, c);
+Context eval((Phrase) `<Statement S>`, Context c)           = exec(S, c);
+Context eval((Phrase) `<ClassDecl CD>`, Context c)          = collect_bindings(declare_class(CD, c));
+Context eval((Phrase) `<VarDecl VD>`, Context c)            = collect_bindings(declare_variables(VD, c));
+Context eval((Phrase) `<MethodDecl MD>`, Context c)         = collect_bindings(declare_global_method(MD, c));
 Context eval((Phrase) `<Phrase P1> <Phrase P2>`, Context c) = eval(P2, eval(P1,c));
 
 Context collect_bindings(Context c) {
-  if (!c.failed && envlit(env) := get_result(c)) {
-    return env_override(c, env);
+  if (envlit(new) := get_result(c)) {
+    c.env = c.env + new;
   }
-  else return set_fail(c);
+  return c;
 }
 
-Context phrase_class(Context c, ClassDecl CD) {
+Context exec(Statement s, Context c) = exec(c,s);
+Context declare_variables(VarDecl VD, Context c) = declare_variables(c, [VD]); 
+
+Context declare_class(ClassDecl CD, Context c) {
   c = bind_class_occurrences_(c, class_occurrences(CD));
   if (!c.failed && envlit(env) := get_result(c)) {
     return redeclare_class(env_override(c, env), CD);
@@ -72,10 +77,10 @@ Context bind_class_occurrences_(Context c, class_names) { // alternative method 
   return set_result(c, envlit(res));
 }
 
-Context declare_global_method(Context c0, (MethodDecl) 
+Context declare_global_method((MethodDecl) 
 	`public <Type T> <Identifier ID> ( <FormalList? FLs> ) { 
 	'  <VarDecl* VDs> <Statement* Ss> return <Expression E> ;
-	'}`) {
+	'}`, Context c0) {
     <r, c0> = fresh_atom(c0); // required for recursion
 	clos = closure(Context(Context local_c) {
 	  return in_environment(local_c, c0.env, Context(Context local_c) {

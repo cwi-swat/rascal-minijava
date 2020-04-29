@@ -17,7 +17,7 @@ void main(loc l) {
   l_output = l.parent + (l.file + ".output");
   println(l);
   program = load(l);
-  c = exec(program);
+  c = eval(program);
   res = "";
   if (!c.failed) {
     res = "";

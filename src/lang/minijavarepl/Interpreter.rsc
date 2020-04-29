@@ -10,7 +10,8 @@ import lang::std::Layout;
 import util::Maybe;
 import IO;
 
-Context eval((Program) `<Phrase P>`) = eval(P);
+Context exec(Program p) = exec(P, empty_context());
+Context exec((Program) `<Phrase P>`, Context c) = eval(P, c);
 
 Context eval(Phrase p) = eval(p, empty_context());	
 Context eval((Phrase) `<Expression E> ;`, Context c)        = eval((Phrase) `System.out.println(<Expression E>);`, c);

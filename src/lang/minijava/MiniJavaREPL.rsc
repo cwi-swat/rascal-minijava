@@ -1,6 +1,5 @@
 module lang::minijava::MiniJavaREPL
 
-import Map;
 import List;
 import String;
 
@@ -9,34 +8,34 @@ import bacata::REPL;
 import bacata::Notebook;
 
 import lang::minijavarepl::Syntax;
-//import lang::minijava::Syntax;
-//import lang::minijava::Interpreter;
 import lang::minijavarepl::Interpreter;
-//import lang::minijava::AuxiliarySyntax;
 import lang::minijavarepl::AuxiliarySyntax;
 
 
 import lang::html5::DOM;
 
-NotebookServer getNB(bool debug = false) {
+NotebookServer getMiniJavaNotebook(bool debug = false) {
 	k = kernel("MiniJava", |home:///Documents/ResearchProjects/rascal-minijava/src/|, "lang::minijava::MiniJavaREPL::myMiniJavaREPl", salixPath=|home:///salix/src|);
 	return createNotebook(k, debug = debug);
 }
 
 REPL myMiniJavaREPl() {
-	Context miniJHandler(str input, Context c) {
+
+	Program miniJavaParser(str input) {
+		return load(input);
+	}
+	
+	Context miniJHandler(Program p, Context c) {
 		try {
-			Program p = load(input);
 			Context newC = exec(p, c);
 			return newC;
 		} catch e: {
-			return set_fail(c, ["<e>"]);
+			return set_fail(c);
 		}
 	}
 	
 	Content miniJPrinter(Context old, Context current) {
 		str result = "";
-		//if (!current.failed && !isEmpty(current.out)) {			
 		if (!current.failed) {
 			list[str] resList = drop(size(old.out), current.out);
 		
@@ -53,5 +52,5 @@ REPL myMiniJavaREPl() {
 	Completion miniJavaCompletor(str line, int cursor, Context config)
 		= <0, [ e | e <- config.env, startsWith(e, line) ]>;
 
-	return repl2(newHandler = miniJHandler, initConfig = empty_context(), printer = miniJPrinter, completor = miniJavaCompletor);
+	return repl2(parser = miniJavaParser, newHandler = miniJHandler, initConfig = empty_context(), printer = miniJPrinter, completor = miniJavaCompletor);
 }

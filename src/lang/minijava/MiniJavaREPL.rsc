@@ -1,5 +1,6 @@
 module lang::minijava::MiniJavaREPL
 
+import IO;
 import List;
 import String;
 
@@ -22,7 +23,12 @@ NotebookServer getMiniJavaNotebook(bool debug = false) {
 REPL myMiniJavaREPl() {
 
 	Program miniJavaParser(str input) {
-		return load(input);
+		try {
+			return load(input);
+		} catch e: {
+			println("Parse error: <e>");
+			return (Program)``;
+		}
 	}
 	
 	Context miniJHandler(Program p, Context c) {
@@ -30,6 +36,7 @@ REPL myMiniJavaREPl() {
 			Context newC = exec(p, c);
 			return newC;
 		} catch e: {
+			c.out = c.out + "<e>";
 			return set_fail(c);
 		}
 	}

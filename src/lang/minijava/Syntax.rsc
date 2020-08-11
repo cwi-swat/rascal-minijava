@@ -69,7 +69,7 @@ syntax FormalList = Type Identifier ( "," FormalList )?;
 
 syntax Type = "int" "[" "]" | "boolean" | "int" | Identifier;
 
-syntax MethodDecl = "public" Type Identifier "(" FormalList? ")" "{"
+syntax MethodDecl = "public" Type Identifier id "(" FormalList? ")" "{"
                        VarDecl* Statement* "return" Expression ";" 
                      "}";
 syntax VarDecl = Type Identifier ";";

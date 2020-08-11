@@ -44,7 +44,8 @@ syntax Expression
 	> left (Expression "[" Expression "]" 
            |Expression "." Identifier "(" ExpressionList? ")")
 	> "!" Expression
-	> left Expression "*" Expression
+	> left (Expression "*" Expression
+			| Expression "/" Expression)
 	> left (Expression "+" Expression
 	       |Expression "-" Expression)
 	> non-assoc Expression "\<" Expression

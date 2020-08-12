@@ -2,7 +2,6 @@ module lang::minijava::Syntax
 
 extend lang::std::Layout;
 
-import IO;
 import ParseTree;
 
 //layout MyLayout = [\t\n\ \r\f]*;
@@ -84,7 +83,7 @@ syntax MainClass = "class" Identifier "{"
                       "}"
                     "}";
                   
-syntax Program = Standard MainClass ClassDecl* Standard;
+syntax Program = MainClass ClassDecl*;
 
 
 //MethodDecl load(str s) = parse(#MethodDecl, s, allowAmbiguity = true);

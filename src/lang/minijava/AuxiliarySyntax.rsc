@@ -7,7 +7,7 @@ alias Out = list[str];
 data Context = ctx(Env env, Sto sto, int seed, Out out, Val given, Exception failed, Val res);
 
 data Exception
-  = failure(str msg = "Error")
+  = failure(str msg = "Exception")
   | exception(Class class)
   | no_failure()
   ;

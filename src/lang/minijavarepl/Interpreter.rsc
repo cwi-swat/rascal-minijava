@@ -15,7 +15,7 @@ Context exec((Program) `<Phrase P>`, Context c) = eval(P, c);
 
 Context eval(Phrase p) = eval(p, empty_context());	
 Context eval((Phrase) `<Expression E> ;`, Context c)        = collect_bindings(create_bindings(eval((Phrase) `System.out.println(<Expression E>);`, c)));
-Context eval((Phrase) `<Statement S>`, Context c)           = exec(S, c);
+Context eval((Phrase) `<Statement S>`, Context c)           = set_output(exec(S, c));
 Context eval((Phrase) `<ClassDecl CD>`, Context c)          = collect_bindings(declare_class(CD, c));
 Context eval((Phrase) `<VarDecl VD>`, Context c)            = set_output(collect_bindings(declare_variables(VD, c)));
 Context eval((Phrase) `<MethodDecl MD>`, Context c)         = collect_bindings(declare_global_method(MD, c));

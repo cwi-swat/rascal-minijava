@@ -278,7 +278,7 @@ Context exec(Context c, (Statement) `<Identifier ID> [ <Expression E1> ] = <Expr
 Context exec(Context c, (Statement) `System.out.println(<Expression E>);`) {
   c = eval(c, E);
   if (!c.failed)
-    return set_result(append_output(c, [to_string(get_result(c)), "\n"]), null_value());
+  	return append_output(c, [to_string(get_result(c)), "\n"]);
   return c;
 }
 Context exec(Context c, (Statement) `while( <Expression E> ) <Statement S>`) {

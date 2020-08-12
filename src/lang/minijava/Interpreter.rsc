@@ -385,6 +385,20 @@ Context eval(Context c, (Expression) `<Expression E1> * <Expression E2>`) {
   }
   else return set_fail(c);
 }
+Context eval(Context c, (Expression) `<Expression E1> / <Expression E2>`) {
+  c = eval(c, E1); 
+  if(no_failure() := c.failed && intlit(x) := get_result(c)) {
+	  c = eval(c, E2);
+	  if (no_failure() := c.failed && intlit(y) := get_result(c))
+	  	if (y != 0)
+	    	return set_result(c, intlit(x * y));
+	    else
+	    	return set_fail(c, "Exception ArithmeticException: / by zero");
+	  else
+	    return set_fail(c);  
+  }
+  else return set_fail(c);
+}
 Context eval(Context c, (Expression) `new int [ <Expression E1> ]`) {
   c = eval(c, E1); 
   if (no_failure() := c.failed && intlit(x) := get_result(c)) {

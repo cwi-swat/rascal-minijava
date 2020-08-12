@@ -4,7 +4,13 @@ alias Env = map[str,Val];
 alias Sto = map[Ref,Val];
 alias Out = list[str];
 
-data Context = ctx(Env env, Sto sto, int seed, Out out, Val given, bool failed, Val res);
+data Context = ctx(Env env, Sto sto, int seed, Out out, Val given, Exception failed, Val res);
+
+data Exception
+  = failure(str msg = "Error")
+  | exception(Class class)
+  | no_failure()
+  ;
 
 data Val = ref(Ref r) 
          | intlit(int i) 
@@ -25,7 +31,7 @@ data Object   = object(int id, str class_name, Env fields, list[Object] parents)
 Context empty_context() {
   Env env = ();
   Sto sto = ();
-  return ctx(env, sto, 0, [], null_value(), false, null_value());
+  return ctx(env, sto, 0, [], null_value(), no_failure(), null_value());
 } 
 
 Context in_environment(Context c, Env env, Context(Context) body) {
@@ -50,10 +56,14 @@ Val get_given(Context c) {
 }
 
 Context set_fail(Context c) {
-  return ctx(c.env, c.sto, c.seed, c.out, c.given, true, null_value());
+  return ctx(c.env, c.sto, c.seed, c.out, c.given, failure(), null_value());
+}
+
+Context set_fail(Context c, str error) {
+  return ctx(c.env, c.sto, c.seed, c.out, c.given, failure(msg=error), null_value());
 }
 
 Val get_result(Context c) = c.res;
 Context set_result(Context c, Val res) {
-  if (c.failed) return c; else return ctx(c.env, c.sto, c.seed, c.out, c.given, c.failed, res);
+  if (failure(msg=_) := c.failed) return c; else return ctx(c.env, c.sto, c.seed, c.out, c.given, c.failed, res);
 }

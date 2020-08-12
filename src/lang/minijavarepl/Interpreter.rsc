@@ -3,6 +3,7 @@ module lang::minijavarepl::Interpreter
 import lang::minijavarepl::AuxiliarySyntax;
 import lang::minijava::Syntax;
 import lang::minijavarepl::Syntax;
+import lang::minijavaexception::Syntax;
 extend lang::minijava::Interpreter;
 
 import lang::std::Layout;
@@ -55,7 +56,7 @@ Context declare_variables(VarDecl VD, Context c) = declare_variables(c, [VD]);
 
 Context declare_class(ClassDecl CD, Context c) {
   c = bind_class_occurrences_(c, class_occurrences(CD));
-  if (!c.failed && envlit(env) := get_result(c)) {
+  if (no_failure() := c.failed && envlit(env) := get_result(c)) {
     return redeclare_class(env_override(c, env), CD);
   }
   else return set_fail(c);
@@ -69,7 +70,7 @@ Context redeclare_class(Context c, (ClassDecl)
   = redeclare_class(c, ID1, VDs, MDs, nothing());
 Context redeclare_class(Context c, ID, VDs, MDs, Maybe[str] mID2) {
   c = declare_class_val(c, ID, VDs, MDs, mID2);
-  if (!c.failed && classlit(class_val) := get_result(c)) {
+  if (no_failure() := c.failed && classlit(class_val) := get_result(c)) {
     try {
 	    if(ref(r) := c.env["<ID>"]) {
 	  	  if (classlit(old_class) := c.sto[r]) {
@@ -109,9 +110,9 @@ Context declare_global_method((MethodDecl)
 	  return in_environment(local_c, c0.env, Context(Context local_c) {
 	    if (listlit([*ARGS]) := get_given(local_c)) {
 	      local_c = match_formals(local_c, formal_list(FLs), ARGS);
-          if(!local_c.failed && envlit(args_map) := get_result(local_c)) {
+          if(no_failure() := local_c.failed && envlit(args_map) := get_result(local_c)) {
 	        local_c = declare_variables(local_c, [VD | VD <- VDs]);	
-		    if (!local_c.failed && envlit(local_map) := get_result(local_c)) {
+		    if (no_failure() := local_c.failed && envlit(local_map) := get_result(local_c)) {
 		      return in_environment(local_c, ("<ID>" : ref(r)) + args_map + local_map, Context(Context local_c) {
 		        return eval(exec(local_c, [ s | s <- Ss] ), E);
 		      });
@@ -132,16 +133,16 @@ Context eval(Context c0, (Expression) `<Identifier ID> ( <ExpressionList? ELs> )
  try {
    if(ref(r) := c.env["<ID>"] && closure(clos) := c.sto[r]) {
        c = evaluate_actuals(c, actuals(ELs));
-       if(!c.failed && listlit(ARGS) := get_result(c)) {
+       if(no_failure() := c.failed && listlit(ARGS) := get_result(c)) {
          return with_given(c, listlit(ARGS), clos);
        }
        else return set_fail(c);
     }
     else return set_fail(c);
   }
-  catch: {
+  catch exc: {
     // the code below seems to reveal a bug in Rascal?
     // return eval(c0, (Expression) `this.<Identifier ID> ( <ExpressionList? ELs> )`);
-    return set_fail(c);
+    return set_fail(c, "<exc>");
   }
 }

@@ -38,7 +38,7 @@ Context set_output(Context c, str output) {
 
 Context set_output(Context c) {
 	if (envlit(new) := get_result(c)) {
-		for(key <- new) {
+		for (key <- new) {
 			Val val = c.sto[c.env[key].r];
 			return set_output(c, "<key> ==\> <to_string(val)>");
 		}

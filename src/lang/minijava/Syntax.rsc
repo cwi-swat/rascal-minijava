@@ -2,7 +2,6 @@ module lang::minijava::Syntax
 
 extend lang::std::Layout;
 
-import IO;
 import ParseTree;
 
 //layout MyLayout = [\t\n\ \r\f]*;
@@ -44,7 +43,8 @@ syntax Expression
 	> left (Expression "[" Expression "]" 
            |Expression "." Identifier "(" ExpressionList? ")")
 	> "!" Expression
-	> left Expression "*" Expression
+	> left (Expression "*" Expression
+			| Expression "/" Expression)
 	> left (Expression "+" Expression
 	       |Expression "-" Expression)
 	> non-assoc Expression "\<" Expression
@@ -68,7 +68,7 @@ syntax FormalList = Type Identifier ( "," FormalList )?;
 
 syntax Type = "int" "[" "]" | "boolean" | "int" | Identifier;
 
-syntax MethodDecl = "public" Type Identifier "(" FormalList? ")" "{"
+syntax MethodDecl = "public" Type Identifier id "(" FormalList? ")" "{"
                        VarDecl* Statement* "return" Expression ";" 
                      "}";
 syntax VarDecl = Type Identifier ";";
@@ -83,7 +83,7 @@ syntax MainClass = "class" Identifier "{"
                       "}"
                     "}";
                   
-syntax Program = Standard MainClass ClassDecl* Standard;
+syntax Program = MainClass ClassDecl*;
 
 
 //MethodDecl load(str s) = parse(#MethodDecl, s, allowAmbiguity = true);

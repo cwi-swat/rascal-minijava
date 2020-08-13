@@ -4,7 +4,9 @@ extend lang::minijava::Syntax;
 
 extend lang::std::Layout;
 
-syntax Program = Standard Phrase Standard;
+import ParseTree;
+
+syntax Program = Phrase;
                   
 syntax Phrase = Expression ";" | Statement | VarDecl | ClassDecl | MethodDecl | assoc Phrase Phrase;
 

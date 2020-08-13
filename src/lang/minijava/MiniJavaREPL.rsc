@@ -8,8 +8,8 @@ import Content;
 import bacata::REPL;
 import bacata::Notebook;
 
-import lang::minijavarepl::Syntax;
-import lang::minijavarepl::Interpreter;
+import lang::minijavaexception::Syntax;
+import lang::minijavaexception::Interpreter;
 import lang::minijavarepl::AuxiliarySyntax;
 
 
@@ -43,7 +43,7 @@ REPL myMiniJavaREPl() {
 	
 	Content miniJPrinter(Context old, Context current) {
 		str result = "";
-		if (!current.failed) {
+		if (no_failure() := current.failed) {
 			list[str] resList = drop(size(old.out), current.out);
 		
 			list[HTML5Node] children = [ p(s) | str s <- resList, s != "\n"];

@@ -12,17 +12,29 @@ import util::Maybe;
 import IO;
 
 Context exec(Program p) = exec(p, empty_context());
-Context exec((Program) `<Phrase P>`, Context c) = eval(P, c);
+Context exec((Program) `<Phrase P>`, Context c) = catch_exceptions(eval(P, c));
 
 Context eval(Phrase p) = eval(p, empty_context());	
-Context eval((Phrase) `<Expression E> ;`, Context c)        = collect_bindings(create_bindings(eval((Phrase) `System.out.println(<Expression E>);`, c)));
+Context eval((Phrase) `<Expression E> ;`, Context c)        = set_output(collect_bindings(create_bindings(eval(c, E))));
 Context eval((Phrase) `<Statement S>`, Context c)           = set_output(exec(S, c));
 Context eval((Phrase) `<ClassDecl CD>`, Context c)          = collect_bindings(declare_class(CD, c));
 Context eval((Phrase) `<VarDecl VD>`, Context c)            = set_output(collect_bindings(declare_variables(VD, c)));
 Context eval((Phrase) `<MethodDecl MD>`, Context c)         = collect_bindings(declare_global_method(MD, c));
 Context eval((Phrase) `<Phrase P1> <Phrase P2>`, Context c) = eval(P2, eval(P1,c));
 
+Context catch_exceptions(Context c) {
+	if (failure(exception(msg)) := c.failed) 
+		return  set_exception(set_output(c, msg), no_failure());
+	else
+		return c;	
+}
+
+Context set_exception(Context c, Exception e)
+	= ctx(c.env, c.sto, c.seed, c.out, c.given, e, c.res);
+
+
 Context create_bindings(Context c) {
+// check if there's always a result
   <r, c> = fresh_atom(c);
   c = sto_override(c, (r : get_result(c)));
   return set_result(c, envlit(("ss<r>" : ref(r))));
@@ -143,6 +155,12 @@ Context eval(Context c0, (Expression) `<Identifier ID> ( <ExpressionList? ELs> )
   catch exc: {
     // the code below seems to reveal a bug in Rascal?
     // return eval(c0, (Expression) `this.<Identifier ID> ( <ExpressionList? ELs> )`);
-    return set_fail(c, "<exc>");
+    return set_fail(c, failure(exception("<exc>")));
   }
+}
+
+Context exec(Context c, (Statement) `throw new <StringLiteral s>;`) {
+  if (no_failure() := c.failed)
+  	return set_fail(c, failure(exception("<s>")));
+  return c;
 }

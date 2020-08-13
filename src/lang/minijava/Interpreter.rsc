@@ -393,7 +393,7 @@ Context eval(Context c, (Expression) `<Expression E1> / <Expression E2>`) {
 	  	if (y != 0)
 	    	return set_result(c, intlit(x * y));
 	    else
-	    	return set_fail(c, "Exception ArithmeticException: / by zero");
+	    	return set_fail(c, failure(exception("Exception ArithmeticException: / by zero")));
 	  else
 	    return set_fail(c);  
   }
@@ -507,6 +507,6 @@ str to_string(ref(n)) = "ref@<n>";
 str to_string(intlit(n)) = "<n>";
 str to_string(boollit(b)) = "<b>";
 str to_string(null_value()) = "null";
-str to_string(V) = print("<V>");
+str to_string(V) = "<V>";
 
 data OptEnv = Some(Env e) | Empty();

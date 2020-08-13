@@ -1,7 +1,7 @@
 created class B
-b ==> null_value()
+b ==> null
 created class A
-a ==> null_value()
+a ==> null
 replaced class B
-x ==> intlit(0)
-y ==> intlit(0)
+x ==> 0
+y ==> 0

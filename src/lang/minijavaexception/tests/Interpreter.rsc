@@ -4,7 +4,7 @@ import IO;
 import String;
 
 import lang::minijavaexception::Syntax;
-import lang::minijavarepl::AuxiliarySyntax;
+import lang::minijavaexception::AuxiliarySyntax;
 import lang::minijavarepl::Interpreter;
 
 
@@ -24,6 +24,12 @@ void main(loc l) {
       res += "<s>\n";
     }
   }
-  else res = "<c>\n";
+  else {
+  	for (str s <- c.out) {
+      res += "<s>\n";
+    }
+  	res += "<c>\n";
+  		
+  }
   writeFile(l_output, res);
 }

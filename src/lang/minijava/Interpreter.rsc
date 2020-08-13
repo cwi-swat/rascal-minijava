@@ -1,7 +1,5 @@
 module lang::minijava::Interpreter
 
-import lang::std::Layout;
-
 import lang::minijava::Syntax;
 import lang::minijava::AuxiliarySyntax;
 

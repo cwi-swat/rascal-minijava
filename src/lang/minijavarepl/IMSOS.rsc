@@ -1,373 +1,212 @@
 module lang::minijavarepl::IMSOS
 
-import lang::iml::Operations;
 import Type;
 import lang::minijavarepl::AbstractSyntax;
+import lang::iml::operations;
 
-data Context = ctx(value env,value sto,value seed,value out,value res);
+data Context = ctx(value env,value store,value out,value signal_cnt,value signal_brk,value res);
 Context empty_context() {
-  return ctx(map_empty(),map_empty(),0,list_nil(),-1);
+  return ctx(map-empty(),map-empty(),nil(),none(),none(),-1);
 }
-Context eval1(Context ctx, lit(V)) {
-  ctx.res = V;
-  return ctx;
-}
-Context eval1(Context ctx, length(E)) {
-  ctx = eval1(ctx,E);
-  if(V := ctx.res) {
-    ctx.res = size(V);
-    return ctx;
-  } else { fail; }
-}
-Context eval1(Context ctx, tt()) {
-  ctx.res = true;
-  return ctx;
-}
-Context eval1(Context ctx, ff()) {
-  ctx.res = false;
-  return ctx;
-}
-Context eval1(Context ctx, ref(Id)) {
-  Gam = ctx.env;
-  Sig = ctx.sto;
-  if(R := map_lookup(Gam , Id)) {
-    if(V := map_lookup(Sig , R)) {
-      ctx.env = Gam;
-      ctx.sto = Sig;
-      ctx.res = V;
-      return ctx;
-    } else { fail; }
-  } else { fail; }
-}
-Context eval1(Context ctx, new_array(E)) {
-  ctx = eval1(ctx,E);
-  if(N := ctx.res) {
-    ctx = eval1(ctx,new_references(N,0));
-    if(V := ctx.res) {
-      ctx.res = V;
-      return ctx;
-    } else { fail; }
-  } else { fail; }
-}
-Context eval1(Context ctx, new_references(N,D)) {
-  if(true := int_leq(N , 0)) {
-    ctx.res = list_nil();
-    return ctx;
-  } else { fail; }
-}
-Context eval1(Context ctx, new_references(N,D)) {
-  if(true := int_geq(N , 1)) {
-    if(N2 := pred(N)) {
-      ctx = eval1(ctx,new_reference(D));
-      if(V := ctx.res) {
-        ctx = eval1(ctx,new_references(N2,D));
-        if(Vs := ctx.res) {
-          ctx.res = list_cons(V , Vs);
-          return ctx;
-        } else { fail; }
-      } else { fail; }
-    } else { fail; }
-  } else { fail; }
-}
-Context eval1(Context ctx, new_reference(D)) {
-  S0 = ctx.seed;
-  Sig0 = ctx.sto;
-  if(S1 := succ(S0)) {
-    if(Sig1 := map_insert(S1 , D , Sig0)) {
-      ctx.seed = S1;
-      ctx.sto = Sig1;
-      ctx.res = S1;
-      return ctx;
-    } else { fail; }
-  } else { fail; }
-}
-Context eval1(Context ctx, not(E)) {
-  ctx = eval1(ctx,E);
-  if(V := ctx.res) {
-    ctx.res = bool_neg(V);
-    return ctx;
-  } else { fail; }
-}
-Context eval1(Context ctx, mult(P,Q)) {
-  ctx = eval1(ctx,P);
-  if(V1 := ctx.res) {
-    ctx = eval1(ctx,Q);
-    if(V2 := ctx.res) {
-      ctx.res = int_product(V1 , V2);
-      return ctx;
-    } else { fail; }
-  } else { fail; }
-}
-Context eval1(Context ctx, plus(P,Q)) {
-  ctx = eval1(ctx,P);
-  if(V1 := ctx.res) {
-    ctx = eval1(ctx,Q);
-    if(V2 := ctx.res) {
-      ctx.res = int_sum(V1 , V2);
-      return ctx;
-    } else { fail; }
-  } else { fail; }
-}
-Context eval1(Context ctx, minus(P,Q)) {
-  ctx = eval1(ctx,P);
-  if(V1 := ctx.res) {
-    ctx = eval1(ctx,Q);
-    if(V2 := ctx.res) {
-      ctx.res = int_subtract(V1 , V2);
-      return ctx;
-    } else { fail; }
-  } else { fail; }
-}
-Context eval1(Context ctx, less_than(P,Q)) {
-  ctx = eval1(ctx,P);
-  if(V1 := ctx.res) {
-    ctx = eval1(ctx,Q);
-    if(V2 := ctx.res) {
-      ctx.res = int_less_than(V1 , V2);
-      return ctx;
-    } else { fail; }
-  } else { fail; }
-}
-Context eval1(Context ctx, and(P,Q)) {
-  ctx = eval1(ctx,P);
-  if(V1 := ctx.res) {
-    ctx = eval1(ctx,Q);
-    if(V2 := ctx.res) {
-      ctx.res = bool_and(V1 , V2);
-      return ctx;
-    } else { fail; }
-  } else { fail; }
-}
-Context eval1(Context ctx, if_then_else(E,S1,_)) {
-  ctx = eval1(ctx,E);
+Context eval1(Context ctx, while(E,C)) {
+  Sig = ctx.store;
+  ctx.env = Sig;
+  ctx = eval4(ctx,E);
+  _ = ctx.env;
   if(true := ctx.res) {
-    ctx = eval1(ctx,S1);
-    if(V := ctx.res) {
-      ctx.res = V;
-      return ctx;
-    } else { fail; }
-  } else { fail; }
-}
-Context eval1(Context ctx, if_then_else(E,_,S2)) {
-  ctx = eval1(ctx,E);
-  if(false := ctx.res) {
-    ctx = eval1(ctx,S2);
-    if(V := ctx.res) {
-      ctx.res = V;
-      return ctx;
-    } else { fail; }
-  } else { fail; }
-}
-Context eval1(Context ctx, while_loop(E,S)) {
-  ctx = eval1(ctx,E);
-  if(true := ctx.res) {
-    ctx = eval1(ctx,S);
-    if(_ := ctx.res) {
-      ctx = eval1(ctx,while_loop(E,S));
-      if(V := ctx.res) {
-        ctx.res = V;
-        return ctx;
-      } else { fail; }
-    } else { fail; }
-  } else { fail; }
-}
-Context eval1(Context ctx, while_loop(E,S)) {
-  ctx = eval1(ctx,E);
-  if(false := ctx.res) {
-    ctx.res = done();
+    ctx.store = Sig;
+    ctx.res = seq(listen_cnt(C),while(E,C));
     return ctx;
+  } else { fail; }
+}
+Context eval1(Context ctx, seq(C1,C2)) {
+  ctx = eval1(ctx,C1);
+  if(C1' := ctx.res) {
+    ctx.res = seq(C1',C2);
+    return ctx;
+  } else { fail; }
+}
+Context eval1(Context ctx, seq(done(),C2)) {
+  ctx.res = C2;
+  return ctx;
+}
+Context eval1(Context ctx, assign(R,E)) {
+  Sig1 = ctx.store;
+  ctx.env = Sig1;
+  ctx = eval4(ctx,E);
+  _ = ctx.env;
+  if(V := ctx.res) {
+    if(Sig2 := map-insert(Sig1 , R , V)) {
+      ctx.store = Sig2;
+      ctx.res = done();
+      return ctx;
+    } else { fail; }
   } else { fail; }
 }
 Context eval1(Context ctx, print(E)) {
-  Alp0 = ctx.out;
-  ctx.out = Alp0;
-  ctx = eval1(ctx,E);
-  Alp1 = ctx.out;
+  Sig = ctx.store;
+  L1 = ctx.out;
+  ctx.env = Sig;
+  ctx = eval4(ctx,E);
+  _ = ctx.env;
   if(V := ctx.res) {
-    ctx.out = list_append(Alp1 , V);
+    ctx.store = Sig;
+    ctx.out = list-append(L1 , list(V));
     ctx.res = done();
     return ctx;
   } else { fail; }
 }
-Context eval1(Context ctx, assign(I,E)) {
-  Gam = ctx.env;
-  Sig0 = ctx.sto;
-  ctx.env = Gam;
-  ctx.sto = Sig0;
-  ctx = eval1(ctx,E);
-  Gam = ctx.env;
-  Sig1 = ctx.sto;
-  if(V := ctx.res) {
-    if(R := map_lookup(Gam , I)) {
-      if(Sig2 := map_insert(R , V , Sig1)) {
-        ctx.env = Gam;
-        ctx.sto = Sig2;
-        ctx.res = done();
+Context eval1(Context ctx, while(E,C)) {
+  Sig = ctx.store;
+  ctx.env = Sig;
+  ctx = eval4(ctx,E);
+  _ = ctx.env;
+  if(false := ctx.res) {
+    ctx.store = Sig;
+    ctx.res = done();
+    return ctx;
+  } else { fail; }
+}
+Context eval1(Context ctx, while(E,C)) {
+  Sig = ctx.store;
+  ctx.env = Sig;
+  ctx = eval4(ctx,E);
+  _ = ctx.env;
+  if(true := ctx.res) {
+    ctx.store = Sig;
+    ctx.res = seq(C,while(E,C));
+    return ctx;
+  } else { fail; }
+}
+Context eval3(Context ctx, plus(E1,E2)) {
+  ctx = eval4(ctx,E1);
+  if(I1 := ctx.res) {
+    ctx = eval4(ctx,E2);
+    if(I2 := ctx.res) {
+      if(I3 := integer-add(I1 , I2)) {
+        ctx.res = I3;
         return ctx;
       } else { fail; }
     } else { fail; }
   } else { fail; }
 }
-Context eval1(Context ctx, array_assign(I,P,Q)) {
-  Gam = ctx.env;
-  Sig0 = ctx.sto;
-  if(R := map_lookup(Gam , I)) {
-    if(A := map_lookup(Sig0 , R)) {
-      ctx.env = Gam;
-      ctx.sto = Sig0;
-      ctx = eval1(ctx,P);
-      Gam = ctx.env;
-      Sig1 = ctx.sto;
-      if(N := ctx.res) {
-        if(R2 := index(A , N)) {
-          ctx.env = Gam;
-          ctx.sto = Sig1;
-          ctx = eval1(ctx,Q);
-          Gam = ctx.env;
-          Sig2 = ctx.sto;
-          if(V := ctx.res) {
-            if(Sig3 := map_insert(R2 , V , Sig2)) {
-              ctx.env = Gam;
-              ctx.sto = Sig3;
-              ctx.res = done();
-              return ctx;
-            } else { fail; }
-          } else { fail; }
-        } else { fail; }
+Context eval3(Context ctx, leq(E1,E2)) {
+  ctx = eval4(ctx,E1);
+  if(I1 := ctx.res) {
+    ctx = eval4(ctx,E2);
+    if(I2 := ctx.res) {
+      if(true := is-less-or-equal(I1 , I2)) {
+        ctx.res = true;
+        return ctx;
       } else { fail; }
     } else { fail; }
   } else { fail; }
 }
-Context eval1(Context ctx, seq(S1,S2)) {
-  ctx = eval1(ctx,S1);
-  if(_ := ctx.res) {
-    ctx = eval1(ctx,S2);
-    if(V := ctx.res) {
-      ctx.res = V;
-      return ctx;
+Context eval3(Context ctx, leq(E1,E2)) {
+  ctx = eval4(ctx,E1);
+  if(I1 := ctx.res) {
+    ctx = eval4(ctx,E2);
+    if(I2 := ctx.res) {
+      if(false := is-less-or-equal(I1 , I2)) {
+        ctx.res = false;
+        return ctx;
+      } else { fail; }
     } else { fail; }
   } else { fail; }
 }
-Context eval1(Context ctx, vardecl(Ty,Id)) {
-  Gam = ctx.env;
-  ctx = eval2(ctx,Ty);
-  if(V := ctx.res) {
-    ctx.env = Gam;
-    ctx = eval1(ctx,new_reference(V));
-    Gam = ctx.env;
-    if(R := ctx.res) {
-      ctx.env = Gam;
-      ctx.res = map_singleton(Id , R);
-      return ctx;
-    } else { fail; }
-  } else { fail; }
-}
-Context eval1(Context ctx, close(S)) {
-  Gam = ctx.env;
-  ctx.res = closure(Gam,S);
-  return ctx;
-}
-Context eval2(Context ctx, "int") {
-  ctx.res = 0;
-  return ctx;
-}
-Context eval1(Context ctx, method(Nm,Body)) {
-  Gam = ctx.env;
-  if(Clo := closure(Gam,Body)) {
-    ctx.env = Gam;
-    ctx = eval1(ctx,new_reference(Clo));
-    Gam = ctx.env;
-    if(R := ctx.res) {
-      ctx.env = Gam;
-      ctx.res = map_singleton(Nm , R);
-      return ctx;
-    } else { fail; }
-  } else { fail; }
-}
-Context eval1(Context ctx, scope(D,S)) {
-  Gam0 = ctx.env;
-  ctx.env = Gam0;
-  ctx = eval1(ctx,D);
-  Gam0 = ctx.env;
-  if(Gam1 := ctx.res) {
-    ctx.env = map_union(Gam0 , Gam1);
-    ctx = eval1(ctx,S);
-    Gam2 = ctx.env;
-    if(V := ctx.res) {
-      ctx.env = Gam0;
-      ctx.res = V;
-      return ctx;
-    } else { fail; }
-  } else { fail; }
-}
-Context eval1(Context ctx, accumulate(D1,D2)) {
-  Gam0 = ctx.env;
-  ctx.env = Gam0;
-  ctx = eval1(ctx,D1);
-  Gam0 = ctx.env;
-  if(Gam1 := ctx.res) {
-    ctx.env = Gam1;
-    ctx = eval1(ctx,D2);
-    Gam1 = ctx.env;
-    if(Gam2 := ctx.res) {
-      ctx.env = Gam0;
-      ctx.res = map_union(Gam0 , Gam1);
-      return ctx;
-    } else { fail; }
-  } else { fail; }
-}
-Context eval1(Context ctx, phrase_vardecl(D)) {
-  ctx = eval1(ctx,D);
-  if(Gam := ctx.res) {
-    ctx.res = Gam;
-    return ctx;
-  } else { fail; }
-}
-Context eval1(Context ctx, phrase_method_decl(D)) {
-  ctx = eval1(ctx,D);
-  if(Gam := ctx.res) {
-    ctx.res = Gam;
-    return ctx;
-  } else { fail; }
-}
-Context eval1(Context ctx, phrase_stmt(S)) {
-  ctx = eval1(ctx,S);
-  if(_ := ctx.res) {
-    ctx.res = map_empty();
-    return ctx;
-  } else { fail; }
-}
-Context eval1(Context ctx, phrase_seq(D1,D2)) {
-  Gam0 = ctx.env;
-  ctx.env = Gam0;
-  ctx = eval1(ctx,D1);
-  Gam0 = ctx.env;
-  if(Gam1 := ctx.res) {
-    ctx.env = map_union(Gam0 , Gam1);
-    ctx = eval1(ctx,D2);
-    Gam1 = ctx.env;
-    if(Gam2 := ctx.res) {
-      ctx.env = Gam0;
-      ctx.res = map_union(Gam0 , map_union(Gam1 , Gam2));
-      return ctx;
-    } else { fail; }
-  } else { fail; }
-}
-Context eval1(Context ctx, phrase_skip()) {
-  ctx.res = map_empty();
-  return ctx;
-}
-Context eval1(Context ctx, V) {
-  if(true := is_value(V)) {
+Context eval3(Context ctx, ref(R)) {
+  Sig = ctx.env;
+  if(V := map-lookup(Sig , R)) {
+    ctx.env = Sig;
     ctx.res = V;
     return ctx;
   } else { fail; }
 }
-Context eval1(Context ctx, closure(Gam,S)) {
-  ctx.res = closure(Gam,S);
-  return ctx;
-}
-Context eval1(Context ctx, done()) {
+Context eval1(Context ctx, continue()) {
+  none() = ctx.signal_cnt;
+  ctx.signal_cnt = cnt();
   ctx.res = done();
   return ctx;
+}
+Context eval1(Context ctx, listen_cnt(C1)) {
+  none() = ctx.signal_cnt;
+  ctx.signal_cnt = none();
+  ctx = eval1(ctx,C1);
+  none() = ctx.signal_cnt;
+  if(C1' := ctx.res) {
+    ctx.signal_cnt = none();
+    ctx.res = listen_cnt(C1');
+    return ctx;
+  } else { fail; }
+}
+Context eval1(Context ctx, listen_cnt(done())) {
+  ctx.res = done();
+  return ctx;
+}
+Context eval1(Context ctx, listen_cnt(C1)) {
+  none() = ctx.signal_cnt;
+  ctx.signal_cnt = none();
+  ctx = eval1(ctx,C1);
+  cnt() = ctx.signal_cnt;
+  if(C1' := ctx.res) {
+    ctx.signal_cnt = none();
+    ctx.res = done();
+    return ctx;
+  } else { fail; }
+}
+Context eval1(Context ctx, break()) {
+  none() = ctx.signal_brk;
+  ctx.signal_brk = brk();
+  ctx.res = done();
+  return ctx;
+}
+Context eval1(Context ctx, listen_brk(C1)) {
+  none() = ctx.signal_brk;
+  ctx.signal_brk = none();
+  ctx = eval1(ctx,C1);
+  none() = ctx.signal_brk;
+  if(C1' := ctx.res) {
+    ctx.signal_brk = none();
+    ctx.res = listen_brk(C1');
+    return ctx;
+  } else { fail; }
+}
+Context eval1(Context ctx, listen_brk(done())) {
+  ctx.res = done();
+  return ctx;
+}
+Context eval1(Context ctx, listen_brk(C1)) {
+  none() = ctx.signal_brk;
+  ctx.signal_brk = none();
+  ctx = eval1(ctx,C1);
+  brk() = ctx.signal_brk;
+  if(C1' := ctx.res) {
+    ctx.signal_brk = none();
+    ctx.res = done();
+    return ctx;
+  } else { fail; }
+}
+Context eval2(Context ctx, _X1) {
+  ctx = eval1(ctx,_X1);
+  if(_X2 := ctx.res) {
+    ctx = eval2(ctx,_X2);
+    if(_X3 := ctx.res) {
+      ctx.res = _X3;
+      return ctx;
+    } else { fail; }
+  } else { fail; }
+}
+Context eval4(Context ctx, _X5) {
+  ctx = eval3(ctx,_X5);
+  if(_X6 := ctx.res) {
+    ctx = eval4(ctx,_X6);
+    if(_X7 := ctx.res) {
+      ctx.res = _X7;
+      return ctx;
+    } else { fail; }
+  } else { fail; }
+}
+Context eval2(Context ctx, _X0) {
+}
+Context eval4(Context ctx, _X4) {
 }

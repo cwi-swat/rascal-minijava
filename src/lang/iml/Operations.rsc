@@ -1,5 +1,9 @@
 module lang::iml::Operations
 
+import util::Maybe;
+
+maybe[&T] none = nothing();
+
 map[value,value] map_empty() = ();
 map[&K, &V] map_union(map[&K, &V] m1, map[&K,&V] m2) = m1 + m2;
 map[&K, &V] map_insert(&K k, &V v, map[&K,&V] m) = m + ( k : v );

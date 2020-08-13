@@ -19,7 +19,7 @@ void main(loc l) {
   program = load(l);
   c = exec(program);
   res = "";
-  if (!c.failed) {
+  if (no_failure() := c.failed) {
     res = "";
     for (str s <- c.out) {
       res += s;

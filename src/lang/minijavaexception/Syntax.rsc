@@ -12,4 +12,11 @@ syntax Throws
 syntax ExceptionType = Identifier;
 
 syntax Statement
-  = "throw" Expression ";";
+  = "throw" "new" StringLiteral ";";
+  
+lexical StringLiteral = [\"] StrChar* [\"];
+
+lexical StrChar
+  = ![\"\\]
+  | [\\][\\\"nfbtr]
+  ;

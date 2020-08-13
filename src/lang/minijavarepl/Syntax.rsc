@@ -6,7 +6,7 @@ extend lang::std::Layout;
 
 import ParseTree;
 
-syntax Program = Phrase;
+syntax Program = Standard Phrase Standard;
                   
 syntax Phrase = Expression ";" | Statement | VarDecl | ClassDecl | MethodDecl | assoc Phrase Phrase;
 

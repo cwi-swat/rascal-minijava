@@ -1,0 +1,31 @@
+
+class B {
+	public int mymethod() { 
+		return 0; 
+	}
+}
+
+B b;
+b = new B();
+
+
+class A {
+	public int mymethod(){
+		return b.mymethod();
+	}
+}
+
+A a;
+a = new A();
+
+class B {
+	public long mymethod() { 
+		return 0; 
+	}
+}
+
+int x;
+x = 4;
+
+int y;
+y = a.mymethod(); 

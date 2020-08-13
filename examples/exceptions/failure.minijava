@@ -1,0 +1,7 @@
+int x;
+x=1;
+
+new A();
+
+int y;
+y=2;

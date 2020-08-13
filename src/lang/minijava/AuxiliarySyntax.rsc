@@ -7,11 +7,15 @@ alias Out = list[str];
 data Context = ctx(Env env, Sto sto, int seed, Out out, Val given, Exception failed, Val res);
 
 data Exception
-  = failure(str msg = "Exception")
-  | exception(Class class)
+  = failure(ExceptionType e)
   | no_failure()
   ;
-
+  
+data ExceptionType
+  = failed()
+  | exception(str msg)
+  ;  
+  
 data Val = ref(Ref r) 
          | intlit(int i) 
          | boollit(bool b) 
@@ -56,14 +60,14 @@ Val get_given(Context c) {
 }
 
 Context set_fail(Context c) {
-  return ctx(c.env, c.sto, c.seed, c.out, c.given, failure(), null_value());
+  return ctx(c.env, c.sto, c.seed, c.out, c.given, failure(failed()), null_value());
 }
 
-Context set_fail(Context c, str error) {
-  return ctx(c.env, c.sto, c.seed, c.out, c.given, failure(msg=error), null_value());
+Context set_fail(Context c, Exception exc) {
+  return ctx(c.env, c.sto, c.seed, c.out, c.given, exc, null_value());
 }
 
 Val get_result(Context c) = c.res;
 Context set_result(Context c, Val res) {
-  if (failure(msg=_) := c.failed) return c; else return ctx(c.env, c.sto, c.seed, c.out, c.given, c.failed, res);
+  if (failure(_) := c.failed) return c; else return ctx(c.env, c.sto, c.seed, c.out, c.given, c.failed, res);
 }

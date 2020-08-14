@@ -39,7 +39,7 @@ Context class_sequence(Context c, CDs) {
   else return set_fail(c);
 }
     
-Context bind_class_occurrences(Context c, class_names) {
+Context bind_class_occurrences(Context c, set[str] class_names) {
   Env res = ();
   for (class_name <- class_names) {
     <r, c> = fresh_atom(c);
@@ -278,14 +278,14 @@ Context exec(Context c, (Statement) `<Identifier ID> [ <Expression E1> ] = <Expr
         } else return set_fail(c);
       }else return set_fail(c);
     }
-    catch exc: { print exc; return set_fail(c);}  
+    catch exc: { println(exc); return set_fail(c);}  
   }
   else return set_fail(c);
 }
 Context exec(Context c, (Statement) `System.out.println(<Expression E>);`) {
   c = eval(c, E);
   if (no_failure() := c.failed)
-  	return append_output(c, [to_string(get_result(c)), "\n"]);
+  	return set_result(append_output(c, [to_string(get_result(c)), "\n"]), null_value());
   return c;
 }
 Context exec(Context c, (Statement) `while( <Expression E> ) <Statement S>`) {

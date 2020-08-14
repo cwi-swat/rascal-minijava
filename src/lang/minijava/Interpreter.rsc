@@ -1,7 +1,5 @@
 module lang::minijava::Interpreter
 
-import lang::std::Layout;
-
 import lang::minijava::Syntax;
 import lang::minijava::AuxiliarySyntax;
 
@@ -254,7 +252,7 @@ Context exec(Context c, (Statement) `<Identifier ID> = <Expression E>;`) {
   c = eval(c, E);
   try    {
     if (no_failure() := c.failed && ref(r) := c.env["<ID>"]) {
-      return set_result(sto_override(c, ( r  : get_result(c) )), envlit(("<ID>": ref(r))));
+      return set_result(sto_override(c, ( r  : get_result(c) )), null_value());
     }
     else return set_fail(c);
   }

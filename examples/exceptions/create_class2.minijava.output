@@ -1,11 +1,7 @@
 created class B
-b ==> null_value()
-b ==> objectlit(object(2,"B",(),[]))
+b ==> null
 created class A
-a ==> null_value()
-a ==> objectlit(object(5,"A",(),[]))
+a ==> null
 replaced class B
-x ==> intlit(0)
-x ==> intlit(4)
-y ==> intlit(0)
-y ==> intlit(0)
+x ==> 0
+y ==> 0

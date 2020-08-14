@@ -1,4 +1,3 @@
-
 class B {
 	public int mymethod() { 
 		return 0; 
@@ -28,4 +27,4 @@ int x;
 x = 4;
 
 int y;
-y = a.mymethod(); 
+y = a.mymethod();

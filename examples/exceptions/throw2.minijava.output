@@ -1,2 +1,3 @@
-ss0 ==> intlit(1)
+ss0 ==> 1
 "Error"
+ss1 ==> 2

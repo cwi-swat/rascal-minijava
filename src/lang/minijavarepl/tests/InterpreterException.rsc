@@ -1,10 +1,10 @@
-module lang::minijavaexception::tests::Interpreter
+module lang::minijavarepl::tests::InterpreterException
 
 import IO;
 import String;
 
-import lang::minijavaexception::Syntax;
-import lang::minijavaexception::AuxiliarySyntax;
+import lang::minijavarepl::Syntax;
+import lang::minijavarepl::AuxiliarySyntax;
 import lang::minijavarepl::Interpreter;
 
 

@@ -1,3 +1,2 @@
-x ==> intlit(0)
-x ==> intlit(1)
-ctx(("x":ref(0)),(1:null_value(),2:intlit(0),0:intlit(1)),3,["x ==\> intlit(0)","x ==\> intlit(1)"],null_value(),failure(failed()),null_value())
+x ==> 0
+ctx(("x":ref(0)),(1:null_value(),2:intlit(0),0:intlit(1)),3,["x ==\> 0"],null_value(),failure(failed()),null_value())

@@ -13,7 +13,6 @@ data Exception
   
 data ExceptionType
   = failed()
-  | exception(str msg)
   ;  
   
 data Val = ref(Ref r) 

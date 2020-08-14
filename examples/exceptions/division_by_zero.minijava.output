@@ -1,2 +1,2 @@
-ss0 ==> intlit(5)
+ss0 ==> 5
 Exception ArithmeticException: / by zero

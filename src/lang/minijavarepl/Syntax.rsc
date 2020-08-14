@@ -1,12 +1,13 @@
 module lang::minijavarepl::Syntax
 
-extend lang::minijava::Syntax;
+extend lang::minijavaexception::Syntax;
 
-extend lang::std::Layout;
+//extend lang::std::Layout;
 
 import ParseTree;
+import lang::minijava::Syntax;
 
-syntax Program = Standard Phrase Standard;
+syntax Program = Phrase;
                   
 syntax Phrase = Expression ";" | Statement | VarDecl | ClassDecl | MethodDecl | assoc Phrase Phrase;
 

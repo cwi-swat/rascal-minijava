@@ -246,13 +246,22 @@ Context exec(Context c, [S, *Ss]) {
   if (no_failure() := c.failed && null_value() := get_result(c)) {
     return exec(c, Ss);
   }
-  else return set_fail(c);
+  else if (no_failure() := c.failed && envlit(env) := get_result(c)) {
+    c = exec(c,Ss);
+    if (no_failure() := c.failed && envlit(env2) := get_result(c)) {
+      return set_result(c, envlit(env + env2));
+    }
+    else if (no_failure() := c.failed) {
+      return set_result(c, envlit(env));
+    }
+  }
+  return set_fail(c);
 }
 Context exec(Context c, (Statement) `<Identifier ID> = <Expression E>;`) {
   c = eval(c, E);
   try    {
     if (no_failure() := c.failed && ref(r) := c.env["<ID>"]) {
-      return set_result(sto_override(c, ( r  : get_result(c) )), null_value());
+      return set_result(sto_override(c, ( r  : get_result(c) )), envlit(("<ID>": ref(r))));
     }
     else return set_fail(c);
   }
@@ -391,7 +400,7 @@ Context eval(Context c, (Expression) `<Expression E1> / <Expression E2>`) {
 	  	if (y != 0)
 	    	return set_result(c, intlit(x * y));
 	    else
-	    	return set_fail(c, failure(exception("Exception ArithmeticException: / by zero")));
+	    	return set_fail(c, failure(exception("/ by zero")));
 	  else
 	    return set_fail(c);  
   }
@@ -505,6 +514,7 @@ str to_string(ref(n)) = "ref@<n>";
 str to_string(intlit(n)) = "<n>";
 str to_string(boollit(b)) = "<b>";
 str to_string(null_value()) = "null";
+str to_string(objectlit(object(i,n,_,_))) = "<n>@<i>";
 str to_string(V) = "<V>";
 
 data OptEnv = Some(Env e) | Empty();

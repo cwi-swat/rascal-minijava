@@ -4,14 +4,14 @@ alias Env = map[str,Val];
 alias Sto = map[Ref,Val];
 alias Out = list[str];
 
-data Context = ctx(Env env, Sto sto, int seed, Out out, Val given, Exception failed, Val res);
+data Context = ctx(Env env, Sto sto, int seed, Out out, Val given, MaybeFailure failed, Val res);
 
-data Exception
-  = failure(ExceptionType e)
+data MaybeFailure
+  = failure(FailureType e)
   | no_failure()
   ;
   
-data ExceptionType
+data FailureType
   = failed()
   ;  
   
@@ -62,7 +62,7 @@ Context set_fail(Context c) {
   return ctx(c.env, c.sto, c.seed, c.out, c.given, failure(failed()), null_value());
 }
 
-Context set_fail(Context c, Exception exc) {
+Context set_fail(Context c, MaybeFailure exc) {
   return ctx(c.env, c.sto, c.seed, c.out, c.given, exc, null_value());
 }
 

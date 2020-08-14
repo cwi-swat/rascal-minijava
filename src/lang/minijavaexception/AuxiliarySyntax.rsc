@@ -2,6 +2,7 @@ module lang::minijavaexception::AuxiliarySyntax
 
 extend lang::minijava::AuxiliarySyntax;
 
-data ExceptionType
+data FailureType
   = exception(str msg)
   ;
+  

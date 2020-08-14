@@ -11,6 +11,7 @@ import lang::minijavarepl::Interpreter;
 void main() {
   for (loc l <- |project://rascal-minijava/examples/repl|.ls, endsWith(l.file,".minijava")) main(l);
   for (loc l <- |project://rascal-minijava/examples/class-override|.ls, endsWith(l.file,".minijava")) main(l);
+  for (loc l <- |project://rascal-minijava/examples/exceptions|.ls, endsWith(l.file,".minijava")) main(l);
 }
 
 void main(loc l) {

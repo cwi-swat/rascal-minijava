@@ -3,7 +3,7 @@ module lang::minijavarepl::Interpreter
 import lang::minijavarepl::AuxiliarySyntax;
 import lang::minijava::Syntax;
 import lang::minijavarepl::Syntax;
-extend lang::minijavaexception::Interpreter;
+extend lang::minijava::Interpreter;
 
 import lang::std::Layout;
 
@@ -14,15 +14,66 @@ Context exec(Program p) = exec(p, empty_context());
 Context exec((Program) `<Phrase P>`, Context c) = eval(P, c);
 
 Context eval(Phrase p) = eval(p, empty_context());	
-Context eval((Phrase) `<Expression E> ;`, Context c)        = catch_exceptions(set_output(collect_bindings(create_bindings(eval(c, E)))));
-Context eval((Phrase) `<Statement S>`, Context c)           = catch_exceptions(set_output(exec(S, c)));
-Context eval((Phrase) `<ClassDecl CD>`, Context c)          = collect_bindings(declare_class(CD, c));
-Context eval((Phrase) `<VarDecl VD>`, Context c)            = set_output(collect_bindings(declare_variables(VD, c)));
-Context eval((Phrase) `<MethodDecl MD>`, Context c)         = collect_bindings(declare_global_method(MD, c));
+Context eval((Phrase) `<Statement S>`, Context c)           = catch_exceptions(collect_bindings(set_output(exec(S, c))));
+Context eval((Phrase) `<ClassDecl CD>`, Context c)          = catch_exceptions(collect_bindings(set_output(declare_class(CD, c))));
+Context eval((Phrase) `<VarDecl VD>`, Context c)            = catch_exceptions(collect_bindings(set_output(declare_variables(VD, c))));
+Context eval((Phrase) `<MethodDecl MD>`, Context c)         = catch_exceptions(collect_bindings(set_output(declare_global_method(MD, c))));
 Context eval((Phrase) `<Phrase P1> <Phrase P2>`, Context c) = eval(P2, eval(P1,c));
 
 
 Context exec(Statement s, Context c) = exec(c,s);
+Context exec((Statement) `<Expression E> ;`, Context c) = create_bindings(eval(c, E));
+
+
+Context catch_exceptions(Context c) {
+	if (failure(exception(msg)) := c.failed) 
+		return  set_fail(set_output(c, "Exception: <msg>\n"), no_failure());
+	else
+		return c;	
+}
+
+
+
+Context collect_bindings(Context c) {
+  if (envlit(new) := get_result(c)) {
+    c.env = c.env + new;
+  }
+  return c;
+}
+
+
+Context create_bindings(Context c) {
+// check if it is something that can be assigned (int, int[], boolean or object)
+  <r, c> = fresh_atom(c);
+  c = sto_override(c, (r : get_result(c)));
+  return set_result(c, envlit(("ss<r>" : ref(r))));
+}
+
+Context set_output(Context c, str output) {
+  c.out += [output];
+  return c;
+}
+
+Context set_output(Context c) {
+	if (envlit(new) := get_result(c)) {
+		for (key <- new) {
+			if (ref(r) := new[key]) {
+			  if (classlit(_) := c.sto[r]) {
+			    if (classlit(_) := c.sto[c.env[key].r]) c = set_output(c, "replaced class <key>\n");
+			    else                                    c = set_output(c, "created class <key>\n");
+			  }
+			  else if(closure(_) := c.sto[r]) {
+			    c = set_output(c,  "created method <key>\n");
+			  }
+			  else {
+			    c = set_output(c, "<key> ==\> <to_string(c.sto[r])>\n");
+			  }
+			}
+		}
+	}
+	return c;
+}
+
 Context declare_variables(VarDecl VD, Context c) = declare_variables(c, [VD]); 
 
 Context declare_class(ClassDecl CD, Context c) {
@@ -45,10 +96,10 @@ Context redeclare_class(Context c, ID, VDs, MDs, Maybe[str] mID2) {
     try {
 	    if(ref(r) := c.env["<ID>"]) {
 	  	  if (classlit(old_class) := c.sto[r]) {
-	  	    return set_output(set_result(sto_override(c, ( r : classlit(class_override(class_val,old_class)) )), envlit(( "<ID>" : ref(r)))), "replaced class <ID>");
+	  	    return set_result(sto_override(c, ( r : classlit(class_override(class_val,old_class)) )), envlit(( "<ID>" : ref(r))));
 	  	  }
 	  	  else {
-	  	    return set_output(set_result(sto_override(c, ( r : classlit(class_val) )), envlit(( "<ID>" : ref(r)))), "created class <ID>");
+	  	    return set_result(sto_override(c, ( r : classlit(class_val) )), envlit(( "<ID>" : ref(r))));
 	  	  }  
 	    }
 	    else return set_fail(c);
@@ -96,7 +147,7 @@ Context declare_global_method((MethodDecl)
 	  });
 	});
     c0 = sto_override(c0, (r : clos));
-	return set_output(set_result(c0, envlit( ("<ID>":ref(r)) )), "created method <ID>(<FLs>)");
+	return set_result(c0, envlit( ("<ID>":ref(r)) ));
 }
 
 Context eval(Context c0, (Expression) `<Identifier ID> ( <ExpressionList? ELs> )`) {

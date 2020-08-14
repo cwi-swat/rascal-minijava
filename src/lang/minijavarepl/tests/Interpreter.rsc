@@ -1,12 +1,12 @@
 module lang::minijavarepl::tests::Interpreter
 
+import IO;
+import String;
+
 import lang::minijavarepl::Syntax;
 import lang::minijavarepl::AuxiliarySyntax;
 import lang::minijavarepl::Interpreter;
 
-import String;
-
-import IO;
 
 void main() {
   for (loc l <- |project://rascal-minijava/examples/repl|.ls, endsWith(l.file,".minijava")) main(l);

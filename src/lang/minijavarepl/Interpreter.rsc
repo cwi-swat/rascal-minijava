@@ -5,6 +5,8 @@ import lang::minijava::Syntax;
 import lang::minijavarepl::Syntax;
 extend lang::minijavaexception::Interpreter;
 
+import lang::std::Layout;
+
 import util::Maybe;
 import IO;
 

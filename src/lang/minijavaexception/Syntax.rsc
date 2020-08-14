@@ -1,6 +1,8 @@
 module lang::minijavaexception::Syntax
 
+import lang::minijava::Syntax;
 extend lang::minijavarepl::Syntax;
+extend lang::std::Layout;
 
 syntax MethodDecl = "public" Type Identifier id "(" FormalList? ")" Throws "{"
                        VarDecl* Statement* "return" Expression ";" 

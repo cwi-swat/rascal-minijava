@@ -1,5 +1,6 @@
 created class Super
 created class Sub
+s ==> null
 s ==> Sub@3
 replaced class Sub
 replaced class Sub

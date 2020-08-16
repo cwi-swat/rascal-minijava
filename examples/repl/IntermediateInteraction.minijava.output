@@ -1,6 +1,8 @@
+global ==> 0
 global ==> 1
 ss1 ==> 1
 created class MyClass
+object ==> null
 object ==> MyClass@4
 ss7 ==> 1
 ss9 ==> 2

@@ -17,7 +17,7 @@ Context eval(Phrase p) = eval(p, empty_context());
 Context eval((Phrase) `<Expression E> ;`, Context c)        = catch_exceptions(collect_bindings(set_output(create_bindings(eval(c, E)))));
 Context eval((Phrase) `<Statement S>`, Context c)           = catch_exceptions(collect_bindings(set_output(exec(S, c))));
 Context eval((Phrase) `<ClassDecl CD>`, Context c)          = catch_exceptions(collect_bindings(declare_class(CD, c)));
-Context eval((Phrase) `<VarDecl VD>`, Context c)            = catch_exceptions(collect_bindings(declare_variables(VD, c)));
+Context eval((Phrase) `<VarDecl VD>`, Context c)            = catch_exceptions(collect_bindings(set_output(declare_variables(VD, c))));
 Context eval((Phrase) `<MethodDecl MD>`, Context c)         = catch_exceptions(collect_bindings(declare_global_method(MD, c)));
 Context eval((Phrase) `<Phrase P1> <Phrase P2>`, Context c) = eval(P2, eval(P1,c));
 
@@ -61,16 +61,7 @@ Context set_output(Context c) {
 	if (envlit(new) := get_result(c)) {
 		for (key <- new) {
 			if (ref(r) := new[key]) {
-			  if (classlit(_) := c.sto[r]) {
-			    if (classlit(_) := c.sto[c.env[key].r]) c = set_output(c, "replaced class <key>\n");
-			    else                                    c = set_output(c, "created class <key>\n");
-			  }
-			  else if(closure(_) := c.sto[r]) {
-			    c = set_output(c,  "created method <key>\n");
-			  }
-			  else {
-			    c = set_output(c, "<key> ==\> <to_string(c.sto[r])>\n");
-			  }
+              c = set_output(c, "<key> ==\> <to_string(c.sto[r])>\n");
 			}
 		}
 	}

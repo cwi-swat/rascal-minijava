@@ -1,7 +1,7 @@
 created class B
-b ==> null
+b ==> B@2
 created class A
-a ==> null
+a ==> A@5
 replaced class B
-x ==> 0
+x ==> 4
 y ==> 0

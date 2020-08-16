@@ -1,4 +1,8 @@
-1
-1
-2
-102
+global ==> 1
+ss1 ==> 1
+created class MyClass
+object ==> MyClass@4
+ss7 ==> 1
+ss9 ==> 2
+global ==> 100
+ss11 ==> 102

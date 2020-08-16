@@ -1,3 +1,6 @@
-42
-7
-12
+created class A
+oa ==> A@2
+replaced class A
+ss5 ==> 42
+ss7 ==> 7
+ss9 ==> 12

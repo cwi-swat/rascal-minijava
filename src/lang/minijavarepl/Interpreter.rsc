@@ -14,6 +14,7 @@ Context exec(Program p) = exec(p, empty_context());
 Context exec((Program) `<Phrase P>`, Context c) = eval(P, c);
 
 Context eval(Phrase p) = eval(p, empty_context());	
+Context eval((Phrase) `<Expression E> ;`, Context c)        = catch_exceptions(collect_bindings(set_output(create_bindings(eval(c, E)))));
 Context eval((Phrase) `<Statement S>`, Context c)           = catch_exceptions(collect_bindings(set_output(exec(S, c))));
 Context eval((Phrase) `<ClassDecl CD>`, Context c)          = catch_exceptions(collect_bindings(declare_class(CD, c)));
 Context eval((Phrase) `<VarDecl VD>`, Context c)            = catch_exceptions(collect_bindings(declare_variables(VD, c)));
@@ -22,7 +23,6 @@ Context eval((Phrase) `<Phrase P1> <Phrase P2>`, Context c) = eval(P2, eval(P1,c
 
 
 Context exec(Statement s, Context c) = exec(c,s);
-Context exec((Statement) `<Expression E> ;`, Context c) = create_bindings(eval(c, E));
 
 
 Context catch_exceptions(Context c) {

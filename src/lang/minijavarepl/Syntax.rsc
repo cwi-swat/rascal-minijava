@@ -9,9 +9,7 @@ import lang::minijava::Syntax;
 
 syntax Program = Standard Phrase Standard;
                   
-syntax Phrase = Statement | VarDecl | ClassDecl | MethodDecl | assoc Phrase Phrase;
-
-syntax Statement = Expression ";";
+syntax Phrase = Expression ";" | Statement | VarDecl | ClassDecl | MethodDecl | assoc Phrase Phrase;
 
 syntax Expression = Identifier "(" ExpressionList? ")";
 

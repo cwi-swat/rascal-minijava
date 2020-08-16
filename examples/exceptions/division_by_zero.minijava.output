@@ -1,2 +1,3 @@
 ss0 ==> 5
-Exception ArithmeticException: / by zero
+Exception: / by zero
+ss2 ==> 6

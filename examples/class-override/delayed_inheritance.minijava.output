@@ -1,1 +1,7 @@
-42
+created class Super
+created class Sub
+s ==> Sub@3
+replaced class Sub
+replaced class Sub
+replaced class Super
+ss6 ==> 42

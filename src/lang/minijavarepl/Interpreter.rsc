@@ -15,9 +15,9 @@ Context exec((Program) `<Phrase P>`, Context c) = eval(P, c);
 
 Context eval(Phrase p) = eval(p, empty_context());	
 Context eval((Phrase) `<Statement S>`, Context c)           = catch_exceptions(collect_bindings(set_output(exec(S, c))));
-Context eval((Phrase) `<ClassDecl CD>`, Context c)          = catch_exceptions(collect_bindings(set_output(declare_class(CD, c))));
-Context eval((Phrase) `<VarDecl VD>`, Context c)            = catch_exceptions(collect_bindings(set_output(declare_variables(VD, c))));
-Context eval((Phrase) `<MethodDecl MD>`, Context c)         = catch_exceptions(collect_bindings(set_output(declare_global_method(MD, c))));
+Context eval((Phrase) `<ClassDecl CD>`, Context c)          = catch_exceptions(collect_bindings(declare_class(CD, c)));
+Context eval((Phrase) `<VarDecl VD>`, Context c)            = catch_exceptions(collect_bindings(declare_variables(VD, c)));
+Context eval((Phrase) `<MethodDecl MD>`, Context c)         = catch_exceptions(collect_bindings(declare_global_method(MD, c)));
 Context eval((Phrase) `<Phrase P1> <Phrase P2>`, Context c) = eval(P2, eval(P1,c));
 
 
@@ -26,8 +26,11 @@ Context exec((Statement) `<Expression E> ;`, Context c) = create_bindings(eval(c
 
 
 Context catch_exceptions(Context c) {
-	if (failure(exception(msg)) := c.failed) 
-		return  set_fail(set_output(c, "Exception: <msg>\n"), no_failure());
+	if (failure(ftype) := c.failed) 
+		if (exception(msg) := ftype)
+		  return set_fail(set_output(c, "Exception: <msg>\n"), no_failure());
+		else
+		  return set_fail(set_output(c, "Invalid program\n"), no_failure());
 	else
 		return c;	
 }
@@ -96,10 +99,10 @@ Context redeclare_class(Context c, ID, VDs, MDs, Maybe[str] mID2) {
     try {
 	    if(ref(r) := c.env["<ID>"]) {
 	  	  if (classlit(old_class) := c.sto[r]) {
-	  	    return set_result(sto_override(c, ( r : classlit(class_override(class_val,old_class)) )), envlit(( "<ID>" : ref(r))));
+	  	    return set_output(set_result(sto_override(c, ( r : classlit(class_override(class_val,old_class)) )), envlit(( "<ID>" : ref(r)))), "replaced class <ID>\n");
 	  	  }
 	  	  else {
-	  	    return set_result(sto_override(c, ( r : classlit(class_val) )), envlit(( "<ID>" : ref(r))));
+	  	    return set_output(set_result(sto_override(c, ( r : classlit(class_val) )), envlit(( "<ID>" : ref(r)))), "created class <ID>\n");
 	  	  }  
 	    }
 	    else return set_fail(c);
@@ -147,7 +150,7 @@ Context declare_global_method((MethodDecl)
 	  });
 	});
     c0 = sto_override(c0, (r : clos));
-	return set_result(c0, envlit( ("<ID>":ref(r)) ));
+	return set_output(set_result(c0, envlit( ("<ID>":ref(r)) )), "created method <ID>(<FLs>)\n");
 }
 
 Context eval(Context c0, (Expression) `<Identifier ID> ( <ExpressionList? ELs> )`) {

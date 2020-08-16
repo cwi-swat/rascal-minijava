@@ -1,0 +1,2 @@
+public int mymethod(int x, boolean y) { return 5; }
+mymethod(10,false);

@@ -1,0 +1,5 @@
+{
+1;
+throw new "Error";
+2;
+}

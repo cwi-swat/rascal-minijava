@@ -1,0 +1,177 @@
+Index: Funcons-beta/Computations/Normal/Binding/Binding.cbs
+===================================================================
+--- Funcons-beta/Computations/Normal/Binding/Binding.cbs	(revision 16034)
++++ Funcons-beta/Computations/Normal/Binding/Binding.cbs	(working copy)
+@@ -251,7 +251,10 @@
+ 
+ Auxiliary Funcon
+   bind-to-forward-links(SI:sets(identifiers)) : =>maps(identifiers, links)
+-    ~> map-unite(interleave-map(bind-value(given, fresh-link(values)), 
++    ~> map-unite(interleave-map(bind-value(given, 
++              else(sequential(check-true(is-in-type(bound-directly(given),links))
++                             ,bound-directly(given))
++                  ,fresh-link(values))), 
+                                 set-elements(SI)))
+ /*
+   `bind-to-forward-links(SI)` binds each identifier in the set `SI` to a
+Index: Funcons-beta/Computations/Normal/Flowing/Flowing.cbs
+===================================================================
+--- Funcons-beta/Computations/Normal/Flowing/Flowing.cbs	(revision 16034)
++++ Funcons-beta/Computations/Normal/Flowing/Flowing.cbs	(working copy)
+@@ -224,11 +224,13 @@
+   computations: interleaving is only allowed following a transition of `X` that
+   emits `yielded(signal)`.
+ */
++/*
+ Rule
+                    X --yielded( )->1 X'
+           atomic(X') --yielded( )->2 X''
+   -----------------------------------------------
+   atomic(X) --yielded( )->1 ; --yielded( )->2 X''
++*/
+ Rule
+           X --yielded( )-> V
+                 V : T
+@@ -240,3 +242,4 @@
+           X --yielded(signal)-> X'
+   -----------------------------------
+   atomic(X) --yielded( )-> atomic(X')
++
+Index: Funcons-beta/Computations/Normal/Linking/Linking.cbs
+===================================================================
+--- Funcons-beta/Computations/Normal/Linking/Linking.cbs	(revision 16034)
++++ Funcons-beta/Computations/Normal/Linking/Linking.cbs	(working copy)
+@@ -45,8 +45,10 @@
+ /*
+   The value of a link can be set only once.
+ */
++//Rule
++//  set-link(link(Var:variables), V:T) ~> initialise-variable(Var, V)
+ Rule
+-  set-link(link(Var:variables), V:T) ~> initialise-variable(Var, V)
++  set-link(link(Var:variables), V:T) ~> assign(Var, V)
+ 
+ 
+ Funcon
+Index: Funcons-beta/Values/Composite/Classes/Classes.cbs
+===================================================================
+--- Funcons-beta/Values/Composite/Classes/Classes.cbs	(revision 16034)
++++ Funcons-beta/Values/Composite/Classes/Classes.cbs	(working copy)
+@@ -84,3 +84,20 @@
+   For multiple inheritance, different resolution orders can be specified
+   by using different linearisations of the class name tree.
+ */
++
++Funcon 
++  class-override(C1:classes, C2:classes) : => classes
++   ~> class( thunk closure give( tuple ( dereference force class-instantiator C1
++                                       , dereference force class-instantiator C2 )
++                               , reference object ( fresh-atom
++                                  , object-class-name first tuple-elements given
++                                  , map-override (object-feature-map first  tuple-elements given
++                                                 ,object-feature-map second tuple-elements given)
++                                  , object-subobject-sequence first  tuple-elements given
++                                  , object-subobject-sequence second tuple-elements given
++                                  ) )
++           , map-override (class-feature-map C1, class-feature-map C2)
++           , class-superclass-name-sequence C1
++           , class-superclass-name-sequence C2 )
++
++
+Index: FunconInterpreter-beta/cbs/Funcons/Core/Computations/Normal/Binding/Binding.hs
+===================================================================
+--- FunconInterpreter-beta/cbs/Funcons/Core/Computations/Normal/Binding/Binding.hs	(revision 16036)
++++ FunconInterpreter-beta/cbs/Funcons/Core/Computations/Normal/Binding/Binding.hs	(working copy)
+@@ -179,7 +179,7 @@
+     where rewrite1 = do
+             let env = emptyEnv
+             env <- vsMatch fargs [VPAnnotated (VPMetaVar "SI") (TApp "sets" [TName "identifiers"])] env
+-            rewriteTermTo (TApp "map-unite" [TApp "interleave-map" [TApp "bind-value" [TName "given",TApp "fresh-link" [TName "values"]],TApp "set-elements" [TVar "SI"]]]) env
++            rewriteTermTo (TApp "map-unite" [TApp "interleave-map" [TApp "bind-value" [TName "given",TApp "else" [TApp "sequential" [TApp "check-true" [TApp "is-in-type" [TApp "bound-directly" [TName "given"],TName "links"]],TApp "bound-directly" [TName "given"]],TApp "fresh-link" [TName "values"]]],TApp "set-elements" [TVar "SI"]]]) env
+ 
+ set_forward_links_ fargs = FApp "set-forward-links" (fargs)
+ stepSet_forward_links fargs =
+Index: FunconInterpreter-beta/cbs/Funcons/Core/Computations/Normal/Flowing/Flowing.hs
+===================================================================
+--- FunconInterpreter-beta/cbs/Funcons/Core/Computations/Normal/Flowing/Flowing.hs	(revision 16036)
++++ FunconInterpreter-beta/cbs/Funcons/Core/Computations/Normal/Flowing/Flowing.hs	(working copy)
+@@ -12,7 +12,7 @@
+     [("yielding",DataTypeMemberss "yielding" [] [DataTypeMemberConstructor "signal" [] (Just [])])]
+ 
+ funcons = libFromList
+-    [("left-to-right",NonStrictFuncon stepLeft_to_right),("l-to-r",NonStrictFuncon stepLeft_to_right),("right-to-left",NonStrictFuncon stepRight_to_left),("r-to-l",NonStrictFuncon stepRight_to_left),("sequential",NonStrictFuncon stepSequential),("seq",NonStrictFuncon stepSequential),("effect",StrictFuncon stepEffect),("choice",NonStrictFuncon stepChoice),("if-true-else",PartiallyStrictFuncon [Strict,NonStrict,NonStrict] NonStrict stepIf_true_else),("if-else",PartiallyStrictFuncon [Strict,NonStrict,NonStrict] NonStrict stepIf_true_else),("while-true",NonStrictFuncon stepWhile_true),("while",NonStrictFuncon stepWhile_true),("do-while-true",NonStrictFuncon stepDo_while_true),("do-while",NonStrictFuncon stepDo_while_true),("interleave",StrictFuncon stepInterleave),("signal",NullaryFuncon stepSignal),("yield",NullaryFuncon stepYield),("yield-on-value",StrictFuncon stepYield_on_value),("yield-on-abrupt",NonStrictFuncon stepYield_on_abrupt),("yielding",NullaryFuncon stepYielding)]
++    [("left-to-right",NonStrictFuncon stepLeft_to_right),("l-to-r",NonStrictFuncon stepLeft_to_right),("right-to-left",NonStrictFuncon stepRight_to_left),("r-to-l",NonStrictFuncon stepRight_to_left),("sequential",NonStrictFuncon stepSequential),("seq",NonStrictFuncon stepSequential),("effect",StrictFuncon stepEffect),("choice",NonStrictFuncon stepChoice),("if-true-else",PartiallyStrictFuncon [Strict,NonStrict,NonStrict] NonStrict stepIf_true_else),("if-else",PartiallyStrictFuncon [Strict,NonStrict,NonStrict] NonStrict stepIf_true_else),("while-true",NonStrictFuncon stepWhile_true),("while",NonStrictFuncon stepWhile_true),("do-while-true",NonStrictFuncon stepDo_while_true),("do-while",NonStrictFuncon stepDo_while_true),("interleave",StrictFuncon stepInterleave),("signal",NullaryFuncon stepSignal),("yield",NullaryFuncon stepYield),("yield-on-value",StrictFuncon stepYield_on_value),("yield-on-abrupt",NonStrictFuncon stepYield_on_abrupt),("atomic",NonStrictFuncon stepAtomic),("yielding",NullaryFuncon stepYielding)]
+ 
+ left_to_right_ fargs = FApp "left-to-right" (fargs)
+ l_to_r_ fargs = FApp "left-to-right" (fargs)
+@@ -163,5 +163,28 @@
+             env <- receiveSignalPatt __varabrupt (Nothing) env
+             stepTermTo (TApp "yield-on-abrupt" [TVar "X'"]) env
+ 
++atomic_ fargs = FApp "atomic" (fargs)
++stepAtomic fargs =
++    evalRules [rewrite1] [step1,step2]
++    where rewrite1 = do
++            let env = emptyEnv
++            env <- fsMatch fargs [PAnnotated (PMetaVar "V") (TName "values")] env
++            rewriteTermTo (TVar "V") env
++          step1 = do
++            let env = emptyEnv
++            env <- lifted_fsMatch fargs [PMetaVar "X"] env
++            env <- getControlPatt "yielded" (Nothing) env
++            (env,[__varyielded]) <- receiveSignals ["yielded"] (withControlTerm "yielded" (Nothing) env (premise (TVar "X") [PMetaVar "V"] env))
++            env <- receiveSignalPatt __varyielded (Nothing) env
++            env <- lifted_sideCondition (SCIsInSort (TVar "V") (TName "values")) env
++            stepTermTo (TVar "V") env
++          step2 = do
++            let env = emptyEnv
++            env <- lifted_fsMatch fargs [PMetaVar "X"] env
++            env <- getControlPatt "yielded" (Nothing) env
++            (env,[__varyielded]) <- receiveSignals ["yielded"] (withControlTerm "yielded" (Just (TName "signal")) env (premise (TVar "X") [PMetaVar "X'"] env))
++            env <- receiveSignalPatt __varyielded (Just (PADT "signal" [])) env
++            stepTermTo (TApp "atomic" [TVar "X'"]) env
++
+ yielding_ = FName "yielding"
+ stepYielding = rewriteType "yielding" []
+\ No newline at end of file
+Index: FunconInterpreter-beta/cbs/Funcons/Core/Computations/Normal/Linking/Linking.hs
+===================================================================
+--- FunconInterpreter-beta/cbs/Funcons/Core/Computations/Normal/Linking/Linking.hs	(revision 16036)
++++ FunconInterpreter-beta/cbs/Funcons/Core/Computations/Normal/Linking/Linking.hs	(working copy)
+@@ -54,7 +54,7 @@
+     where rewrite1 = do
+             let env = emptyEnv
+             env <- vsMatch fargs [PADT "link" [VPAnnotated (VPMetaVar "Var") (TName "variables")],VPAnnotated (VPMetaVar "V") (TName "values")] env
+-            rewriteTermTo (TApp "initialise-variable" [TVar "Var",TVar "V"]) env
++            rewriteTermTo (TApp "assign" [TVar "Var",TVar "V"]) env
+ 
+ follow_link_ fargs = FApp "follow-link" (fargs)
+ stepFollow_link fargs =
+Index: FunconInterpreter-beta/cbs/Funcons/Core/Values/Composite/Classes/Classes.hs
+===================================================================
+--- FunconInterpreter-beta/cbs/Funcons/Core/Values/Composite/Classes/Classes.hs	(revision 16036)
++++ FunconInterpreter-beta/cbs/Funcons/Core/Values/Composite/Classes/Classes.hs	(working copy)
+@@ -12,7 +12,7 @@
+     [("classes",DataTypeMemberss "classes" [] [DataTypeMemberConstructor "class" [TApp "thunks" [TApp "references" [TName "objects"]],TName "environments",TSortSeq (TName "identifiers") StarOp] (Just [])])]
+ 
+ funcons = libFromList
+-    [("class",StrictFuncon stepClass),("class-instantiator",StrictFuncon stepClass_instantiator),("class-feature-map",StrictFuncon stepClass_feature_map),("class-superclass-name-sequence",StrictFuncon stepClass_superclass_name_sequence),("class-name-tree",StrictFuncon stepClass_name_tree),("is-subclass-name",StrictFuncon stepIs_subclass_name),("class-name-single-inheritance-feature-map",StrictFuncon stepClass_name_single_inheritance_feature_map),("classes",NullaryFuncon stepClasses)]
++    [("class",StrictFuncon stepClass),("class-instantiator",StrictFuncon stepClass_instantiator),("class-feature-map",StrictFuncon stepClass_feature_map),("class-superclass-name-sequence",StrictFuncon stepClass_superclass_name_sequence),("class-name-tree",StrictFuncon stepClass_name_tree),("is-subclass-name",StrictFuncon stepIs_subclass_name),("class-name-single-inheritance-feature-map",StrictFuncon stepClass_name_single_inheritance_feature_map),("merge-classes",StrictFuncon stepMerge_classes),("classes",NullaryFuncon stepClasses)]
+ 
+ class_ fargs = FApp "class" (fargs)
+ stepClass fargs =
+@@ -73,5 +73,13 @@
+             env <- vsMatch fargs [VPAnnotated (VPMetaVar "C") (TName "identifiers")] env
+             rewriteTermTo (TApp "map-override" [TApp "interleave-map" [TApp "class-feature-map" [TApp "bound-value" [TName "given"]],TApp "single-branching-sequence" [TApp "class-name-tree" [TVar "C"]]]]) env
+ 
++merge_classes_ fargs = FApp "merge-classes" (fargs)
++stepMerge_classes fargs =
++    evalRules [rewrite1] []
++    where rewrite1 = do
++            let env = emptyEnv
++            env <- vsMatch fargs [VPAnnotated (VPMetaVar "C1") (TName "classes"),VPAnnotated (VPMetaVar "C2") (TName "classes")] env
++            rewriteTermTo (TApp "class" [TApp "thunk" [TApp "closure" [TApp "give" [TApp "tuple" [TApp "dereference" [TApp "force" [TApp "class-instantiator" [TVar "C1"]]],TApp "dereference" [TApp "force" [TApp "class-instantiator" [TVar "C2"]]]],TApp "reference" [TApp "object" [TName "fresh-atom",TApp "object-class-name" [TApp "first" [TApp "tuple-elements" [TName "given"]]],TApp "map-override" [TApp "object-feature-map" [TApp "second" [TApp "tuple-elements" [TName "given"]]],TApp "object-feature-map" [TApp "first" [TApp "tuple-elements" [TName "given"]]]],TApp "object-subobject-sequence" [TApp "first" [TApp "tuple-elements" [TName "given"]]],TApp "object-subobject-sequence" [TApp "second" [TApp "tuple-elements" [TName "given"]]]]]]]],TApp "map-override" [TApp "class-feature-map" [TVar "C2"],TApp "class-feature-map" [TVar "C1"]],TApp "class-superclass-name-sequence" [TVar "C1"],TApp "class-superclass-name-sequence" [TVar "C2"]]) env
++
+ classes_ = FName "classes"
+ stepClasses = rewriteType "classes" []
+\ No newline at end of file
